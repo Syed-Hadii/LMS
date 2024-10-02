@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.blinking {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+/* Global styles */
+body {
+  transition: background-color 0.3s ease;
+}
+
+/* Dark Mode Styles */
+.bg-gray-800 {
+  background-color: rgb(59 130 246 / .5);
+  color: white;
+}
+
+.bg-white {
+  background-color: white;
+  color: black;
+}
+.bg-body{
+  background-color: #f0f5f9;
+}
+
+/* Adjust other element styles as needed */
+

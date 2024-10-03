@@ -87,11 +87,9 @@ const Suppliers = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold ml-[30vw]">
-        Vendors List
-      </h1>
+      <h1 className="text-3xl underline font-bold ml-[30vw]">Vendors List</h1>
       <button
-        className="bg-blue-500 text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
         onClick={() => setShowAddForm(true)}
       >
         <FaPlus className="text-sm" />
@@ -226,7 +224,10 @@ const Suppliers = () => {
         </thead>
         <tbody>
           {supplierList.map((supplier) => (
-            <tr key={supplier._id} className="border-b text-gray-700 text-sm hover:bg-gray-100">
+            <tr
+              key={supplier._id}
+              className="border-b text-gray-700 text-sm hover:bg-gray-100"
+            >
               <td className="py-3 px-4 max-w-xs">
                 {editingSupplierId === supplier._id ? (
                   <input
@@ -234,7 +235,7 @@ const Suppliers = () => {
                     name="name"
                     value={editableData.name}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
+                    className="border rounded px- w-full"
                   />
                 ) : (
                   supplier.name
@@ -273,7 +274,7 @@ const Suppliers = () => {
                     name="amount"
                     value={editableData.amount}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
+                    className="border rounded px-2 w-32"
                   />
                 ) : (
                   supplier.amount

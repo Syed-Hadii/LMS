@@ -96,7 +96,7 @@ const Land = () => {
     <div className="p-6">
       <h1 className="text-3xl underline font-bold text-center">Land Records</h1>
       <button
-        className="bg-blue-500 text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
         onClick={() => setShowAddForm(true)}
       >
         <FaPlus className="text-sm " />
@@ -147,19 +147,19 @@ const Land = () => {
       <div className="overflow-x-auto">
         <table className="table-auto w-full border-collapse bg-white shadow-lg rounded-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-600 text-sm leading-normal">
+            <tr className="bg-gray-200 text-gray-500  leading-normal">
               <th className="py-3 px-6 text-left">Land Name</th>
               <th className="py-3 px-6 text-left">Land Area</th>
               <th className="py-3 px-6 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody className="text-gray-600 text-sm font-light">
+          <tbody className="text-gray-800 text-sm ">
             {landRecords.map((land) => (
               <tr key={land._id} className="border-b border-gray-200">
                 {editingLandId === land._id ? (
                   // Editable Row
                   <>
-                    <td className="py-3 px-6 text-left">
+                    <td className="py-3 px-3 text-left ">
                       <input
                         type="text"
                         name="name"
@@ -168,7 +168,7 @@ const Land = () => {
                         onChange={handleInputChange}
                       />
                     </td>
-                    <td className="py-3 px-6 text-left">
+                    <td className="py-3 px-3 text-left">
                       <input
                         type="text"
                         name="area"

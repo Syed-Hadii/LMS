@@ -96,7 +96,7 @@ const User = () => {
     try {
       const response = await axios.post(`${url}/adduser/add`, newUser);
       console.log(response.data);
-      fetchUserList()
+      fetchUserList();
       setShowAddForm(false);
       resetForm();
     } catch (error) {
@@ -119,7 +119,7 @@ const User = () => {
       <h1 className="text-3xl underline font-bold text-center">Users List</h1>
 
       <button
-        className="bg-blue-500 text-white font-semibold px-4  flex items-center gap-2  rounded-md py-2 mb-5"
+        className="bg-[#067528]  text-white font-semibold px-4  flex items-center gap-2  rounded-md py-2 mb-5"
         onClick={() => {
           resetForm();
           setShowAddForm(true);

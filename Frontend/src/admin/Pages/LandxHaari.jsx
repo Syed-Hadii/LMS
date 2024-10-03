@@ -158,7 +158,7 @@ const handleCancelEdit = () => {
         Assigned Lands to Haaries
       </h1>
       <button
-        className="bg-blue-500 text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
         onClick={() => {
           setShowAddForm(true);
           setNewLand({
@@ -405,7 +405,7 @@ const handleCancelEdit = () => {
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-sm">
             {landxHaariList.map((haariItem) =>
               haariItem.land.map((land, index) => (
                 <tr
@@ -423,7 +423,7 @@ const handleCancelEdit = () => {
                             haariId: e.target.value,
                           })
                         }
-                        className="border px-2 py-1 rounded max-w-full"
+                        className="border px-2 py-1 rounded max-w-28"
                       >
                         {haari.map((haari) => (
                           <option key={haari._id} value={haari._id}>
@@ -480,7 +480,7 @@ const handleCancelEdit = () => {
                             ],
                           })
                         }
-                        className="border px-2 py-1 rounded max-w-full"
+                        className="border px-2 py-1 rounded max-w-32"
                       />
                     ) : (
                       land.crop_name
@@ -503,7 +503,7 @@ const handleCancelEdit = () => {
                             ],
                           })
                         }
-                        className="border px-2 py-1 rounded max-w-full"
+                        className="border px-2 py-1 rounded max-w-28"
                       />
                     ) : (
                       land.start_date
@@ -526,7 +526,7 @@ const handleCancelEdit = () => {
                             ],
                           })
                         }
-                        className="border px-2 py-1 rounded max-w-full"
+                        className="border px-2 py-1 rounded max-w-28"
                       />
                     ) : (
                       land.end_date
@@ -549,7 +549,7 @@ const handleCancelEdit = () => {
                             ],
                           })
                         }
-                        className="border px-2 py-1 rounded max-w-full"
+                        className="border px-2 py-1 rounded max-w-40"
                       />
                     ) : (
                       land.details

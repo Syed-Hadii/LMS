@@ -14,6 +14,7 @@ import Store from "./Store";
 import Item from "./Item";
 import StockConsume from "./StockConsume";
 import StockRecieved from "./StockRecieved";
+import ChartsofAccounts from "./ChartsofAccounts";
 
 const Admin = () => {
   const [roles, setRoles] = useState([]);
@@ -43,6 +44,7 @@ const Admin = () => {
           <Route path="/item" element={<Item />} />
           <Route path="/stock_consume" element={<StockConsume />} />
           <Route path="/stock_recieve" element={<StockRecieved />} />
+          <Route path="/chartsofaccounts" element={<ChartsofAccounts />} />
         </Routes>
       </div>
     </div>

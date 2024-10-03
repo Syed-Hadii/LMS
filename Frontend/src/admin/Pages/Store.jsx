@@ -92,7 +92,7 @@ const Store = () => {
     <div className="p-6">
       <h1 className="text-3xl underline font-bold ml-[30vw]">Stores List</h1>
       <button
-        className="bg-blue-500 text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
         onClick={() => {
           setNewStore("");
           setShowAddForm(true);
@@ -150,7 +150,7 @@ const Store = () => {
                 {editingStoreId === store._id ? (
                   // Editable Row
                   <>
-                    <td className="py-3 px-6 text-left">
+                    <td className="py-3 px-4 text-left">
                       <input
                         type="text"
                         className="border w-full px-2 py-2"

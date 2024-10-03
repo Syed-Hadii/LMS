@@ -87,7 +87,7 @@ const Role = () => {
     <div className="p-6">
       <h1 className="text-3xl underline font-bold ml-[30vw]">Roles List</h1>
       <button
-        className="bg-blue-500 text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
         onClick={() => {
           setNewRole(""); // Reset newRole
           setShowAddForm(true);

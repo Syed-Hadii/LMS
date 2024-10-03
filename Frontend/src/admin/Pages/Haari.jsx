@@ -101,7 +101,7 @@ const Haari = () => {
     <div className="p-6">
       <h1 className="text-3xl underline font-bold ml-[30vw]">Roles List</h1>
       <button
-        className="bg-blue-500 text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
         onClick={() => setShowAddForm(true)}
       >
         <FaPlus className="text-sm" />
@@ -242,7 +242,7 @@ const Haari = () => {
                     name="name"
                     value={editableData.name}
                     onChange={handleEditChange}
-                    className="border rounded px-2"
+                    className="border rounded px-2 w-40"
                   />
                 ) : (
                   haari.name
@@ -255,7 +255,7 @@ const Haari = () => {
                     name="phone"
                     value={editableData.phone}
                     onChange={handleEditChange}
-                    className="border rounded px-2"
+                    className="border rounded px-2 w-40"
                   />
                 ) : (
                   haari.phone
@@ -268,7 +268,7 @@ const Haari = () => {
                     name="nic"
                     value={editableData.nic}
                     onChange={handleEditChange}
-                    className="border rounded px-2"
+                    className="border rounded px-2 w-44"
                   />
                 ) : (
                   haari.nic

@@ -2,102 +2,121 @@ import React, { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 import axios from "axios";
 
-const BankAccounts = () => {
-   const url = "http://localhost:3002";
-   const [showAddForm, setShowAddForm] = useState(false);
-   const [banksList, setBanksList] = useState([]);
+const ChartsofAccounts = () => {
+  const url = "http://localhost:3002";
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [banksList, setBanksList] = useState([]);
   const [newBank, setNewBank] = useState({
+    main_account: "", 
+    sub_account: "",
     account_name: "",
-    type: "", // Updated from "bankType" to "type"
-    bank_name: "",
-    number: "",
-    address: "",
-    amount: "", // Keep this as string to accommodate input handling
+    initial_amount: "", // Keep this as string to accommodate input handling
+    nature_of_account: [], // Array to store Debit/Credit selection
   });
 
-   const [editingBankId, setEditingBankId] = useState(null);
-   const [editableData, setEditableData] = useState({});
+  const [editingBankId, setEditingBankId] = useState(null);
+  const [editableData, setEditableData] = useState({});
 
-   const fetchbank = async () => {
-     try {
-       const response = await axios.get(`${url}/bank/get`);
-       setBanksList(response.data.data);
-     } catch (error) {
-       console.log("Error fetching bank records:", error);
-     }
-   };
+  const fetchbank = async () => {
+    try {
+      const response = await axios.get(`${url}/bank/get`);
+      setBanksList(response.data.data);
+    } catch (error) {
+      console.log("Error fetching bank records:", error);
+    }
+  };
 
-   const handleAdd = async (e) => {
-     e.preventDefault();
-     try {
-       await axios.post(`${url}/bank/add`, newBank);
-       setShowAddForm(false);
-       setNewBank({
-         account_name: "",
-         type: "",
-         bank_name: "",
-         number: "",
-         address: "",
-         amount: "",
-       });
-       fetchbank();
-     } catch (error) {
-       console.log("Error adding bank:", error);
-     }
-   };
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${url}/bank/add`, newBank);
+      setShowAddForm(false);
+      setNewBank({
+        main_account: "",
+        sub_account: "",
+        account_name: "",
+        initial_amount: "",
+        nature_of_account: [],
+      });
+      fetchbank();
+    } catch (error) {
+      console.log("Error adding bank:", error);
+    }
+  };
 
-   const handleEditClick = (bank) => {
-     setEditingBankId(bank._id);
-     setEditableData(bank);
-   };
+  const handleNatureChange = (e) => {
+    const { value } = e.target;
+    setNewBank((prevBank) => {
+      // Toggle selection of Debit/Credit
+      if (prevBank.nature_of_account.includes(value)) {
+        return {
+          ...prevBank,
+          nature_of_account: prevBank.nature_of_account.filter(
+            (item) => item !== value
+          ),
+        };
+      } else {
+        return {
+          ...prevBank,
+          nature_of_account: [...prevBank.nature_of_account, value],
+        };
+      }
+    });
+  };
 
-   const handleEditChange = (e) => {
-     const { name, value } = e.target;
-     setEditableData((prevData) => ({
-       ...prevData,
-       [name]: value,
-     }));
-   };
+  const handleEditClick = (bank) => {
+    setEditingBankId(bank._id);
+    setEditableData(bank);
+  };
 
-   const handleSaveClick = async () => {
-     try {
-       await axios.put(`${url}/bank/update`, {
-         id: editableData._id,
-         ...editableData,
-       });
-       setEditingBankId(null);
-       fetchbank();
-     } catch (error) {
-       console.error("Error updating bank:", error);
-     }
-   };
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditableData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
-   const handleCancelEdit = () => {
-     setEditingBankId(null);
-     setEditableData({});
-   };
+  const handleSaveClick = async () => {
+    try {
+      await axios.put(`${url}/bank/update`, {
+        id: editableData._id,
+        ...editableData,
+      });
+      setEditingBankId(null);
+      fetchbank();
+    } catch (error) {
+      console.error("Error updating bank:", error);
+    }
+  };
 
-   const handleDelete = async (id) => {
-     try {
-       await axios.delete(`${url}/bank/delete`, { data: { id } });
-       fetchbank();
-     } catch (error) {
-       console.log("Error deleting bank:", error);
-     }
-   };
+  const handleCancelEdit = () => {
+    setEditingBankId(null);
+    setEditableData({});
+  };
 
-   const handleChange = (e) => {
-     const { name, value } = e.target;
-     setNewBank({ ...newBank, [name]: value });
-   };
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${url}/bank/delete`, { data: { id } });
+      fetchbank();
+    } catch (error) {
+      console.log("Error deleting bank:", error);
+    }
+  };
 
-   useEffect(() => {
-     fetchbank();
-   }, []);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewBank({ ...newBank, [name]: value });
+  };
+
+  useEffect(() => {
+    fetchbank();
+  }, []);
+
   return (
     <div className="p-6">
       <h1 className="text-3xl underline font-bold text-center">
-        Bank Account List
+        Accounts List
       </h1>
       <button
         className="bg-[#067528] text-white font-semibold px-4  flex items-center gap-2  rounded-md py-2 mb-5"
@@ -106,116 +125,136 @@ const BankAccounts = () => {
         }}
       >
         <FaPlus className="text-sm " />
-        Add Bank Account
+        Add Accountant
       </button>
 
       {/* Add Form */}
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 text-center rounded shadow-lg w-[650px] h-auto mt-10">
-            <h1 className="text-lg font-semibold mb-5">Add Bank Account</h1>
+            <h1 className="text-lg font-semibold mb-5">Add Accountant</h1>
             <hr className="mb-6 border-gray-400" />
             <form className="space-y-6" onSubmit={handleAdd}>
               {/* Flex container for two fields per row */}
               <div className="flex gap-4">
-                <input
-                  type="text"
-                  id="account_name"
-                  name="account_name"
-                  className="border w-full px-2 outline-none py-2 rounded-md"
-                  placeholder="Enter Bank Account Name"
-                  value={newBank.account_name}
-                  onChange={handleChange}
-                  required
-                />
+                {/* Main Account Dropdown */}
+                <div className="w-1/2 text-left">
+                  <label
+                    className="block text-gray-700 font-semibold mb-1"
+                    htmlFor="main_account"
+                  >
+                    Main Account
+                  </label>
+                  <select
+                    id="main_account"
+                    name="main_account"
+                    value={newBank.main_account}
+                    onChange={handleChange}
+                    className="border w-full px-2 outline-none py-2 rounded-md"
+                    required
+                  >
+                    <option value="" disabled>
+                      Select Main Account
+                    </option>
+                    <option value="MainAccount1">Main Account 1</option>
+                    <option value="MainAccount2">Main Account 2</option>
+                    {/* Add more options as needed */}
+                  </select>
+                </div>
 
-                <input
-                  type="text"
-                  id="type"
-                  name="type"
-                  className="border w-full px-2 outline-none py-2 rounded-md"
-                  placeholder="Enter Bank Type"
-                  value={newBank.type}
-                  onChange={handleChange}
-                  required
-                />
+                {/* Sub Account Dropdown */}
+                <div className="w-1/2 text-left">
+                  <label
+                    className="block text-gray-700 font-semibold mb-1"
+                    htmlFor="sub_account"
+                  >
+                    Sub Account
+                  </label>
+                  <select
+                    id="sub_account"
+                    name="sub_account"
+                    value={newBank.sub_account}
+                    onChange={handleChange}
+                    className="border w-full px-2 outline-none py-2 rounded-md"
+                    required
+                  >
+                    <option value="" disabled>
+                      Select Sub Account
+                    </option>
+                    <option value="SubAccount1">Sub Account 1</option>
+                    <option value="SubAccount2">Sub Account 2</option>
+                    {/* Add more options as needed */}
+                  </select>
+                </div>
               </div>
 
+              {/* Account Name and Initial Amount */}
               <div className="flex gap-4">
                 <div className="w-1/2 text-left">
                   <label
                     className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="bank_name"
+                    htmlFor="account_name"
                   >
-                    Bank Name
+                    Account Name
                   </label>
                   <input
                     type="text"
-                    id="bank_name"
-                    name="bank_name"
-                    value={newBank.bank_name}
+                    id="account_name"
+                    name="account_name"
+                    value={newBank.account_name}
                     onChange={handleChange}
                     className="border w-full px-2 outline-none py-2 rounded-md"
-                    placeholder="Enter Bank Name"
+                    placeholder="Enter Account Name"
                     required
                   />
                 </div>
                 <div className="w-1/2 text-left">
                   <label
                     className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="number"
+                    htmlFor="initial_amount"
                   >
-                    Bank Account Number
+                    Initial Amount
                   </label>
                   <input
                     type="number"
-                    id="number"
-                    name="number"
-                    value={newBank.number}
+                    id="initial_amount"
+                    name="initial_amount"
+                    value={newBank.initial_amount}
                     onChange={handleChange}
                     className="border w-full px-2 outline-none py-2 rounded-md"
-                    placeholder="Enter bank Number"
+                    placeholder="Enter Initial Amount"
                     required
                   />
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <div className="w-1/2 text-left">
-                  <label
-                    className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="address"
-                  >
-                    Bank Address
+              {/* Nature of Account with animated checkboxes */}
+              <div className="text-left">
+                <label className="block text-gray-700 font-semibold mb-1">
+                  Nature of Account
+                </label>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nature_of_account"
+                      value="Debit"
+                      className="rounded-full h-5 w-5 transition-all "
+                      onChange={handleNatureChange}
+                    />
+                    <span>Debit</span>
                   </label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={newBank.address}
-                    onChange={handleChange}
-                    className="border w-full px-2 outline-none py-2 rounded-md"
-                    placeholder="Enter Bank Address"
-                    required
-                  />
-                </div>
-                <div className="w-1/2 text-left">
-                  <label
-                    className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="amount"
-                  >
-                    Opening Amount
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nature_of_account"
+                      value="Credit"
+                      className="rounded-full h-5 w-5 transition-all "
+                      onChange={handleNatureChange}
+                    />
+                    <span>Credit</span>
                   </label>
-                  <input
-                    type="number"
-                    id="amount"
-                    name="amount"
-                    value={newBank.amount}
-                    onChange={handleChange}
-                    className="border w-full px-2 outline-none py-2 rounded-md"
-                    placeholder="Enter Amount"
-                    required
-                  />
                 </div>
               </div>
 
@@ -264,7 +303,7 @@ const BankAccounts = () => {
           </tr>
         </thead>
         <tbody>
-          {banksList.map((bank) => (
+          {/* {banksList.map((bank) => (
             <tr
               key={bank._id}
               className="border-b text-gray-700 text-sm hover:bg-gray-100"
@@ -368,11 +407,11 @@ const BankAccounts = () => {
                 )}
               </td>
             </tr>
-          ))}
+          ))} */}
         </tbody>
       </table>
     </div>
   );
 };
 
-export default BankAccounts;
+export default ChartsofAccounts;

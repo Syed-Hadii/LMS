@@ -120,7 +120,7 @@ useEffect(() => {
     <div className="p-6">
       <h1 className="text-3xl underline font-bold text-center">Item List</h1>
       <button
-        className="bg-blue-500 text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
         onClick={() => {
           setShowAddForm(true);
         }}
@@ -287,11 +287,11 @@ useEffect(() => {
             <th className="py-3 px-4 text-left text-gray-600 font-semibold">
               Unit
             </th>
-           
+
             <th className="py-3 px-4 text-left text-gray-600 font-semibold">
               Package Quantity
             </th>
-           
+
             <th className="py-3 px-4 text-left text-gray-600 font-semibold">
               Actions
             </th>
@@ -310,7 +310,7 @@ useEffect(() => {
                     name="name"
                     value={editableData.name}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
+                    className="border rounded px-2 w-40"
                   />
                 ) : (
                   item.name
@@ -329,7 +329,7 @@ useEffect(() => {
                   item.unit
                 )}
               </td>
-             
+
               <td className="py-3 px-4">
                 {editingItemId === item._id ? (
                   <input
@@ -343,8 +343,7 @@ useEffect(() => {
                   item.pkg_qty
                 )}
               </td>
-             
-             
+
               <td className="py-3 px-4">
                 {editingItemId === item._id ? (
                   <>

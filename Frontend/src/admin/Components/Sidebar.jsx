@@ -14,8 +14,6 @@ import {
 
 const Sidebar = () => {
   const [isHaariDropdownOpen, setIsHaariDropdownOpen] = useState(false);
-
-  // Updated linkClasses to reflect the requested color changes
   const linkClasses = ({ isActive }) => {
     return `flex items-center justify-center md:justify-between gap-2 h-8 px-2 rounded-md cursor-pointer transition-all duration-200 ${
       isActive
@@ -169,20 +167,52 @@ const Sidebar = () => {
           </div>
         </NavLink>
 
-        {/* Stock */}
-        <NavLink className={linkClasses} to="stock_consume">
-          <div className="flex items-center gap-2 text-[#067528] ">
-            <FaBox className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Stock Consume
-            </span>
+        <div className="relative">
+          <div
+            className={linkClasses({ isActive: false })}
+            onClick={() => setIsHaariDropdownOpen(!isHaariDropdownOpen)}
+          >
+            <div className="flex items-center justify-between w-full cursor-pointer transition-all">
+              <div className="flex items-center gap-2  text-[#067528]">
+                <FaUser className="w-[16px] h-[16px]" />
+                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
+                  Stock
+                </span>
+              </div>
+
+              <span
+                className={`transition-transform ml-20 text-black duration-300 ${
+                  isHaariDropdownOpen ? "rotate-180" : "rotate-0"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
           </div>
-        </NavLink>
-        <NavLink className={linkClasses} to="stock_recieve">
+
+          {isHaariDropdownOpen && (
+            <div className="flex flex-col ml-6 mt-1 gap-1">
+              {/* Haari link */}
+              <NavLink className={linkClasses} to="stock_consume">
+                <span className="text-[14px] tracking-wider font-[500] text-black ">
+                  Stock Consume
+                </span>
+              </NavLink>
+
+              {/* Land with Haari link */}
+              <NavLink className={linkClasses} to="stock_recieve">
+                <span className="text-[14px] tracking-wider font-[500] text-black ">
+                  Stock Recieve
+                </span>
+              </NavLink>
+            </div>
+          )}
+        </div>
+        <NavLink className={linkClasses} to="chartsofaccounts">
           <div className="flex items-center gap-2 text-[#067528]">
             <FaBox className="w-[16px] h-[16px]" />
             <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Stock Receive
+              Charts of Accounts
             </span>
           </div>
         </NavLink>

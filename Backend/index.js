@@ -12,6 +12,7 @@ import bankRouter from "./routes/bankAccountRoute.js";
 import itemRoter from "./routes/itemRoute.js";
 import stockConsumeRouter from "./routes/stockConsumeRoute.js";
 import stockrecieveRouter from "./routes/stockRecieveRoute.js";
+import chartAccountRouter from "./routes/chartAccountsRoute.js";
 
 const app = express();
 const port = 3002;
@@ -32,6 +33,7 @@ app.use("/bank", bankRouter)
 app.use("/items", itemRoter)
 app.use("/stockconsume", stockConsumeRouter)
 app.use("/stockrecieve", stockrecieveRouter)
+app.use("/chartaccount", chartAccountRouter)
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

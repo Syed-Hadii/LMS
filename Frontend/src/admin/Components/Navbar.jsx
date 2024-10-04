@@ -48,10 +48,9 @@ const Navbar = () => {
     <div
       className={`navbar px-3 py-4 sticky top-0 transition-shadow duration-300 bg-white text-[#067528] ${
         hasShadow ? "shadow-lg" : ""
-      }`} // Color scheme updated
+      }`}
     >
       <div className="container flex justify-between items-center">
-        {/* Search bar for screens 768px and above */}
         <div className="search hidden md:flex border border-[#cfd1d0] focus-within:outline focus-within:outline-[#a8aaa8] focus-within:outline-1 rounded-[4px] py ml-14">
           <button className="border-r-white bg-white rounded-l-md pl-2 pr-1.5 py-1 ">
             <FiSearch className="w-[17px] h-[17px] text-[#808180]" />
@@ -79,13 +78,9 @@ const Navbar = () => {
               <span className="absolute top-1 right-2 bg-blue-500 rounded-full w-1.5 h-1.5 blinking"></span>
             )}
           </NavLink>
-
-          {/* Settings Icon for larger screens */}
           <NavLink className="nav-link  w-10 h-8  items-center justify-center rounded-md transition-all duration-300 relative hidden md:flex">
             <FaCog className="w-[17px] h-[17px] text-[#067528] hover:text-black transition-all" />
           </NavLink>
-
-          {/* Profile Dropdown */}
           <div
             className="relative"
             onMouseEnter={() => setShowDropdown(true)}
@@ -99,7 +94,6 @@ const Navbar = () => {
               />
             </NavLink>
 
-            {/* Dropdown */}
             {showDropdown && (
               <div
                 className="absolute right-0 mt-2 w-48 bg-white border  rounded-lg shadow-lg py-2 z-50"
@@ -107,10 +101,8 @@ const Navbar = () => {
                 onMouseLeave={handleDelayedHide}
               >
                 <p className="px-4 py-2 text-sm text-[#067528] border-b">
-                  {userName} {/* Display logged-in user name */}
+                  {userName} 
                 </p>
-
-                {/* Settings Icon for smaller screens */}
                 <div className="flex flex-col items-start md:hidden">
                   <NavLink className="nav-link w-full px-4 py-2 text-left text-sm text-[#067528] hover:bg-[#067528] hover:text-white">
                     <FaCog className="inline-block w-[17px] h-[17px] mr-2" />

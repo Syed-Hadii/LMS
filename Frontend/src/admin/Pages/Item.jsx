@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Item = () => {
   const url = "http://localhost:3002";
@@ -17,6 +19,10 @@ const Item = () => {
  });
   const [editingItemId, setEditingItemId] = useState(null);
   const [editableData, setEditableData] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredItems = itemList.filter((item) =>
+    item.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
 useEffect(() => {
   const fetchStores = async () => {
@@ -43,6 +49,7 @@ useEffect(() => {
     e.preventDefault();
     try {
       await axios.post(`${url}/items/save`, newItems);
+      toast.success("Item Added Successfully!");
       setShowAddForm(false);
       setNewItems({
         name: "",
@@ -108,7 +115,9 @@ useEffect(() => {
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Accounts"
+            placeholder="Search Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -293,7 +302,7 @@ useEffect(() => {
           </tr>
         </thead>
         <tbody>
-          {itemList.map((item) => (
+          {filteredItems.map((item) => (
             <tr
               key={item._id}
               className="border-b text-gray-700 text-sm hover:bg-gray-100"

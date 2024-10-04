@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Land = () => {
   const url = "http://localhost:3002";
@@ -10,6 +12,10 @@ const Land = () => {
   const [newLandArea, setNewLandArea] = useState("");
   const [editingLandId, setEditingLandId] = useState(null);
   const [editableData, setEditableData] = useState({});
+   const [searchQuery, setSearchQuery] = useState("");
+   const filteredLand = landRecords.filter((land) =>
+     land.name?.toLowerCase().includes(searchQuery.toLowerCase())
+   );
 
   const fetchLandRecords = async () => {
     try {
@@ -39,6 +45,7 @@ const Land = () => {
         setNewLandArea("");
         setShowAddForm(false);
       }
+      toast.success("Land Added Successfully!");
     } catch (error) {
       console.error("Error adding land:", error);
     }
@@ -93,13 +100,42 @@ const Land = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl underline font-bold text-center">Land Records</h1>
-      <button
-        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
-        onClick={() => setShowAddForm(true)}
-      >
-        <FaPlus className="text-sm " />
-        Add Land
-      </button>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => {
+              setShowAddForm(true);
+              setNewLand({
+                haariId: "",
+                land: [
+                  {
+                    land_id: "",
+                    crop_name: "",
+                    start_date: "",
+                    end_date: "",
+                    details: "",
+                  },
+                ],
+              });
+            }}
+          >
+            <FaPlus className="text-sm" /> Add Land
+          </button>
+        </div>
+      </div>
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 text-center rounded shadow-lg w-[550px] h-auto">
@@ -152,7 +188,7 @@ const Land = () => {
             </tr>
           </thead>
           <tbody className="text-gray-800 text-sm ">
-            {landRecords.map((land) => (
+            {filteredLand.map((land) => (
               <tr key={land._id} className="border-b border-gray-200">
                 {editingLandId === land._id ? (
                   <>

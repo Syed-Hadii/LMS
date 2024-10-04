@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../Components/Navbar";
 import Sidebar from "../Components/Sidebar";
 import Dashboard from "./Dashboard";
@@ -15,6 +17,8 @@ import Item from "./Item";
 import StockConsume from "./StockConsume";
 import StockRecieved from "./StockRecieved";
 import ChartsofAccounts from "./ChartsofAccounts";
+import PaymentVoucher from "./PaymentVoucher";
+import RecieveVoucher from "./RecieveVoucher";
 
 const Admin = () => {
   const [roles, setRoles] = useState([]);
@@ -45,8 +49,11 @@ const Admin = () => {
           <Route path="/stock_consume" element={<StockConsume />} />
           <Route path="/stock_recieve" element={<StockRecieved />} />
           <Route path="/chartsofaccounts" element={<ChartsofAccounts />} />
+          <Route path="/paymentvoucher" element={<PaymentVoucher />} />
+          <Route path="/recievevoucher" element={<RecieveVoucher />} />
         </Routes>
       </div>
+      <ToastContainer />
     </div>
   );
 };

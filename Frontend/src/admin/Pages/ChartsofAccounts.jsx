@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaSearch, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ChartsofAccounts = () => {
   const url = "http://localhost:3002";
@@ -13,6 +15,7 @@ const ChartsofAccounts = () => {
     initial_amount: "",
     account_nature: "",
   });
+  const [searchTerm, setSearchTerm] = useState(""); // State for search input
 
   const fetchChartAccount = async () => {
     try {
@@ -52,6 +55,7 @@ const ChartsofAccounts = () => {
       }
 
       await axios.post(`${url}/chartaccount/add`, newChartAccount);
+      toast.success("Account created Successfully!");
       setShowAddForm(false);
       setNewAccount({
         parent_id: "",
@@ -85,6 +89,11 @@ const ChartsofAccounts = () => {
     setNewAccount({ ...newAccount, [name]: value });
   };
 
+  // Filter the account list based on the search term
+  const filteredAccounts = accountList.filter((account) =>
+    account.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   useEffect(() => {
     fetchChartAccount();
   }, []);
@@ -92,12 +101,14 @@ const ChartsofAccounts = () => {
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Accounts List</h1>
-      <div className="flex justify-between ">
+      <div className="flex justify-between">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
             placeholder="Search Accounts"
+            value={searchTerm} // Bind input value to searchTerm state
+            onChange={(e) => setSearchTerm(e.target.value)} // Update search term on input change
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -113,56 +124,6 @@ const ChartsofAccounts = () => {
           </button>
         </div>
       </div>
-
-      {/* Display Accounts */}
-      <div className="space-y-4">
-        {accountList.map((account) => (
-          <div
-            key={account._id}
-            className="border rounded-lg p-4 bg-white shadow-md"
-          >
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold">{account.name}</h2>
-              <button
-                className="text-gray-500"
-                onClick={() => toggleExpand(account._id)}
-              >
-                {expandedAccounts[account._id] ? (
-                  <FaChevronUp />
-                ) : (
-                  <FaChevronDown />
-                )}
-              </button>
-            </div>
-
-            {/* Show sub-accounts if the account is expanded */}
-            {expandedAccounts[account._id] && account.subCat.length > 0 && (
-              <div className="mt-4 space-y-3">
-                <h3 className="text-md font-semibold">Sub-Accounts:</h3>
-                <table className="min-w-full border">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="px-4 py-2 text-left">Sub-Account Name</th>
-                      <th className="px-4 py-2 text-left">Amount</th>
-                      <th className="px-4 py-2 text-left">Type</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {account.subCat.map((sub) => (
-                      <tr key={sub._id} className="border-b">
-                        <td className="px-4 py-2">{sub.name}</td>
-                        <td className="px-4 py-2">{sub.amount}</td>
-                        <td className="px-4 py-2">{sub.account_nature}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
       {/* Add Form */}
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -244,9 +205,9 @@ const ChartsofAccounts = () => {
                           value="Debit"
                           onChange={handleNatureChange}
                           checked={newAccount.account_nature === "Debit"}
-                          className="rounded-full h-5 w-5"
+                          className="cursor-pointer"
                         />
-                        <span>Debit</span>
+                        Debit
                       </label>
 
                       <label className="flex items-center gap-2 cursor-pointer">
@@ -256,26 +217,26 @@ const ChartsofAccounts = () => {
                           value="Credit"
                           onChange={handleNatureChange}
                           checked={newAccount.account_nature === "Credit"}
-                          className="rounded-full h-5 w-5"
+                          className="cursor-pointer"
                         />
-                        <span>Credit</span>
+                        Credit
                       </label>
                     </div>
                   </div>
                 </>
               )}
 
-              <div className="text-center space-x-4">
+              <div className="text-right space-x-6">
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="text-red-500 font-semibold rounded-md px-4 py-2"
+                  className="text-red-600 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
+                  className="px-6 py-2 bg-[#067528] text-white rounded-lg font-semibold"
                   type="submit"
-                  className="bg-[#067528] text-white font-semibold rounded-md px-4 py-2"
                 >
                   Add Account
                 </button>
@@ -284,6 +245,54 @@ const ChartsofAccounts = () => {
           </div>
         </div>
       )}
+      {/* Display Accounts */}
+      <div className="space-y-4">
+        {filteredAccounts.map((account) => (
+          <div
+            key={account._id}
+            className="border rounded-lg p-4 bg-white shadow-md"
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold">{account.name}</h2>
+              <button
+                className="text-gray-500"
+                onClick={() => toggleExpand(account._id)}
+              >
+                {expandedAccounts[account._id] ? (
+                  <FaChevronUp />
+                ) : (
+                  <FaChevronDown />
+                )}
+              </button>
+            </div>
+
+            {/* Show sub-accounts if the account is expanded */}
+            {expandedAccounts[account._id] && account.subCat.length > 0 && (
+              <div className="mt-4 space-y-3">
+                <h3 className="text-md font-semibold">Sub-Accounts:</h3>
+                <table className="min-w-full border">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="px-4 py-2 text-left">Sub-Account Name</th>
+                      <th className="px-4 py-2 text-left">Amount</th>
+                      <th className="px-4 py-2 text-left">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {account.subCat.map((sub) => (
+                      <tr key={sub._id} className="border-b">
+                        <td className="px-4 py-2">{sub.name}</td>
+                        <td className="px-4 py-2">{sub.amount}</td>
+                        <td className="px-4 py-2">{sub.account_nature}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

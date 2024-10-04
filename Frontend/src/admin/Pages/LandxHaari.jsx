@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LandxHaari = () => {
   const url = "http://localhost:3002";
@@ -24,6 +26,11 @@ const LandxHaari = () => {
  
 
   const [editLand, setEditLand] = useState(null);
+   const [searchQuery, setSearchQuery] = useState("");
+   const filteredHaari = landxHaariList.filter((haari) =>
+     haari.haariId.name?.toLowerCase().includes(searchQuery.toLowerCase())
+   );
+
 
   useEffect(() => {
     const fetchHaari = async () => {
@@ -74,6 +81,7 @@ const LandxHaari = () => {
           })),
         };
         await axios.post(`${url}/landxhaari/add`, payload);
+        toast.success("Land Assigned Successfully!");
         setShowAddForm(false);
         fetchLandxHaari();
       } catch (error) {
@@ -159,7 +167,9 @@ const handleCancelEdit = () => {
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Accounts"
+            placeholder="Search Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -418,7 +428,7 @@ const handleCancelEdit = () => {
             </tr>
           </thead>
           <tbody className="text-sm">
-            {landxHaariList.map((haariItem) =>
+            {filteredHaari.map((haariItem) =>
               haariItem.land.map((land, index) => (
                 <tr
                   key={`${haariItem.haariId._id}-${land.land_id._id}`}

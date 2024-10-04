@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const BankAccounts = () => {
    const url = "http://localhost:3002";
@@ -16,7 +19,11 @@ const BankAccounts = () => {
   });
 
    const [editingBankId, setEditingBankId] = useState(null);
-   const [editableData, setEditableData] = useState({});
+  const [editableData, setEditableData] = useState({});
+     const [searchQuery, setSearchQuery] = useState("");
+     const filteredBank = banksList.filter((bank) =>
+       bank.account_name?.toLowerCase().includes(searchQuery.toLowerCase())
+     );
 
    const fetchbank = async () => {
      try {
@@ -31,6 +38,7 @@ const BankAccounts = () => {
      e.preventDefault();
      try {
        await axios.post(`${url}/bank/add`, newBank);
+        toast.success("Account Created Successfully!");
        setShowAddForm(false);
        setNewBank({
          account_name: "",
@@ -104,7 +112,9 @@ const BankAccounts = () => {
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Accounts"
+            placeholder="Search Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -274,7 +284,7 @@ const BankAccounts = () => {
           </tr>
         </thead>
         <tbody>
-          {banksList.map((bank) => (
+          {filteredBank.map((bank) => (
             <tr
               key={bank._id}
               className="border-b text-gray-700 text-sm hover:bg-gray-100"

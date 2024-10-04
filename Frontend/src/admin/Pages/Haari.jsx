@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Haari = () => {
   const url = "http://localhost:3002";
@@ -14,6 +16,11 @@ const Haari = () => {
   });
   const [editingHaariId, setEditingHaariId] = useState(null);
   const [editableData, setEditableData] = useState({});
+   const [searchQuery, setSearchQuery] = useState("");
+   const filteredHaari = haariList.filter((haari) =>
+     haari.name?.toLowerCase().includes(searchQuery.toLowerCase())
+   );
+
 
   const fetchHaari = async () => {
     try {
@@ -33,6 +40,7 @@ const Haari = () => {
     e.preventDefault();
     try {
       await axios.post(`${url}/haari/addhaari`, newHaari);
+      toast.success("Haari Added Successfully!");
       setShowAddForm(false);
       setNewHaari({ name: "", address: "", phone: "", nic: "" });
       fetchHaari(); 
@@ -105,7 +113,9 @@ const Haari = () => {
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Accounts"
+            placeholder="Search Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -238,7 +248,7 @@ const Haari = () => {
           </tr>
         </thead>
         <tbody>
-          {haariList.map((haari) => (
+          {filteredHaari.map((haari) => (
             <tr key={haari._id} className="border-b hover:bg-gray-100">
               <td className="py-3 px-4">
                 {editingHaariId === haari._id ? (

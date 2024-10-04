@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus,FaSave, FaTimes ,FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { FaPlus, FaSave, FaTimes, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Role = () => {
   const url = "http://localhost:3002";
@@ -9,6 +11,11 @@ const Role = () => {
   const [newRole, setNewRole] = useState("");
   const [editingRoleId, setEditingRoleId] = useState(null);
   const [editableRole, setEditableRole] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredRole = roles.filter((role) =>
+    role.role?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
 
   const fetchRoles = async () => {
     try {
@@ -34,6 +41,7 @@ const Role = () => {
         setNewRole("");
         setShowAddForm(false); 
       }
+      toast.success("Role Created Successfully!");
     } catch (error) {
       console.error("Error adding role:", error);
     }
@@ -90,7 +98,9 @@ const Role = () => {
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Accounts"
+            placeholder="Search Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -156,7 +166,7 @@ const Role = () => {
           </tr>
         </thead>
         <tbody>
-          {roles.map((role) => (
+          {filteredRole.map((role) => (
             <tr key={role._id} className="border-b hover:bg-gray-100">
               <td className="py-3 px-4">
                 {editingRoleId === role._id ? (

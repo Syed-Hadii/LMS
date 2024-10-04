@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const StockConsume = () => {
   const url = "http://localhost:3002";
@@ -95,12 +97,13 @@ const StockConsume = () => {
       });
 
       if (response.data.success) {
-        alert("Items saved successfully!");
+       toast.success("Stock Consumed Successfully!");
         setAppendedItems([]);
         setSelectedHaari("");
         await fetchHaari();
         window.location.reload();
-      } else {
+      }
+      else {
         alert(response.data.message);
       }
     } catch (error) {

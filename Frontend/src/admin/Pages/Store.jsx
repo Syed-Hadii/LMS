@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaSearch,
+} from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Store = () => {
   const url = "http://localhost:3002";
@@ -9,6 +18,7 @@ const Store = () => {
   const [newStore, setNewStore] = useState("");
   const [editingStoreId, setEditingStoreId] = useState(null);
   const [editableStore, setEditableStore] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
   const fetchStores = async () => {
     try {
@@ -35,6 +45,7 @@ const Store = () => {
         name: newStore,
       });
       if (response.data.success) {
+        toast.success("Store Created Successfully!");
         fetchStores();
         setNewStore("");
         setShowAddForm(false);
@@ -87,6 +98,11 @@ const Store = () => {
     setEditableStore("");
   };
 
+  // Filter stores based on the search query
+  const filteredStores = stores.filter((store) =>
+    store.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Stores List</h1>
@@ -96,6 +112,8 @@ const Store = () => {
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
             placeholder="Search Accounts"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -158,58 +176,62 @@ const Store = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm ">
-            {stores.map((store) => (
-              <tr key={store._id} className="border-b border-gray-200">
-                {editingStoreId === store._id ? (
-                  <>
-                    <td className="py-3 px-4 text-left">
-                      <input
-                        type="text"
-                        className="border w-full px-2 py-2"
-                        value={editableStore}
-                        onChange={handleEditChange}
-                      />
-                    </td>
-                    <td className="py-3 px-6 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={handleSaveEdit}
-                          className="bg-green-500 text-white rounded px-2 py-1"
-                        >
-                          <FaSave />
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="bg-gray-500 text-white rounded px-2 py-1"
-                        >
-                          <FaTimes />
-                        </button>
-                      </div>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td className="py-3 px-6 text-left">{store.name}</td>
-                    <td className="py-3 px-6 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleEditClick(store)}
-                          className="text-green-600 rounded px-2 py-1"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleRemoveStore(store._id)}
-                          className="text-red-500 rounded px-2 py-1"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
+            {filteredStores.map(
+              (
+                store // Use filteredStores instead of stores
+              ) => (
+                <tr key={store._id} className="border-b border-gray-200">
+                  {editingStoreId === store._id ? (
+                    <>
+                      <td className="py-3 px-4 text-left">
+                        <input
+                          type="text"
+                          className="border w-full px-2 py-2"
+                          value={editableStore}
+                          onChange={handleEditChange}
+                        />
+                      </td>
+                      <td className="py-3 px-6 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={handleSaveEdit}
+                            className="bg-green-500 text-white rounded px-2 py-1"
+                          >
+                            <FaSave />
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="bg-gray-500 text-white rounded px-2 py-1"
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="py-3 px-6 text-left">{store.name}</td>
+                      <td className="py-3 px-6 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => handleEditClick(store)}
+                            className="text-green-600 rounded px-2 py-1"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveStore(store._id)}
+                            className="text-red-500 rounded px-2 py-1"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              )
+            )}
           </tbody>
         </table>
       </div>

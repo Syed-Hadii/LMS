@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
-
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaSearch,
+} from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const User = () => {
   const url = "http://localhost:3002";
@@ -17,6 +25,11 @@ const User = () => {
   });
   const [editingUserId, setEditingUserId] = useState(null);
   const [editableData, setEditableData] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+ const filteredUsers = listUser.filter((user) =>
+   user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+ );
+
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -96,7 +109,7 @@ const User = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`${url}/adduser/add`, newUser);
-      console.log(response.data);
+      toast.success("User Created Successfully!");
       fetchUserList();
       setShowAddForm(false);
       resetForm();
@@ -104,10 +117,10 @@ const User = () => {
       console.error("Error adding user:", error);
     }
   };
-   const handleCancelEdit = () => {
-     setEditingUserId(null);
-     setEditableData({});
-   };
+  const handleCancelEdit = () => {
+    setEditingUserId(null);
+    setEditableData({});
+  };
 
   const resetForm = () => {
     setNewUser({
@@ -128,7 +141,10 @@ const User = () => {
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
             placeholder="Search Accounts"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
+
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
           </button>
@@ -240,7 +256,7 @@ const User = () => {
           </tr>
         </thead>
         <tbody>
-          {listUser.map((user) => (
+          {filteredUsers.map((user) => (
             <tr key={user._id} className="border-b hover:bg-gray-100">
               <td className="py-3 px-4">
                 {editingUserId === user._id ? (

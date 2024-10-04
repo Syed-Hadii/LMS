@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const StockRecieved = () => {
   const url = "http://localhost:3002";
@@ -55,7 +57,7 @@ const StockRecieved = () => {
       });
 
       if (response.data.success) {
-        alert("Items saved successfully!");
+       toast.success("Stock Recieved Successfully!");
         setAppendedItems([]);
         setSelectedVendor("");
         window.location.reload();

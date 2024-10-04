@@ -10,10 +10,19 @@ import {
   FaTruck,
   FaBox,
   FaWarehouse,
+  FaChartLine,
+  FaReceipt,
+  FaStore,
+  FaPeopleCarry,
+  FaMapMarkedAlt,
+  FaUserShield,
+  FaUserCircle,
 } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isHaariDropdownOpen, setIsHaariDropdownOpen] = useState(false);
+  const [isStockDropdownOpen, setIsStockDropdownOpen] = useState(false);
+  const [isVoucherDropdownOpen, setIsVoucherDropdownOpen] = useState(false);
   const linkClasses = ({ isActive }) => {
     return `flex items-center justify-center md:justify-between gap-2 h-8 px-2 rounded-md cursor-pointer transition-all duration-200 ${
       isActive
@@ -40,10 +49,8 @@ const Sidebar = () => {
           />
         </NavLink>
       </div>
-      <p className="text-[12px] font-[400] hidden md:block tracking-wider text-[#067528] ">
-        MENU
-      </p>
-      <div className="flex flex-col gap-2 text-[10px] tracking-wider px-1.5 py-0.5">
+
+      <div className="flex flex-col mt-5 gap-2 text-[10px] tracking-wider px-1.5 py-0.5">
         {/* Dashboard */}
         <NavLink className={linkClasses} to="dashboard">
           <div className="flex items-center gap-2 text-[#067528] ">
@@ -57,7 +64,7 @@ const Sidebar = () => {
         {/* Users */}
         <NavLink className={linkClasses} to="user">
           <div className="flex items-center gap-2 text-[#067528]">
-            <FaUser className="w-[16px] h-[16px]" />
+            <FaUserCircle className="w-[16px] h-[16px]" />
             <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
               Users
             </span>
@@ -67,7 +74,7 @@ const Sidebar = () => {
         {/* Role */}
         <NavLink className={linkClasses} to="role">
           <div className="flex items-center gap-2  text-[#067528]">
-            <FaBuilding className="w-[16px] h-[16px]" />
+            <FaUserShield className="w-[16px] h-[16px]" />
             <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
               Role
             </span>
@@ -120,17 +127,16 @@ const Sidebar = () => {
         {/* Land */}
         <NavLink className={linkClasses} to="land">
           <div className="flex items-center gap-2 text-[#067528]">
-            <FaLandmark className="w-[16px] h-[16px]" />
+            <FaMapMarkedAlt className="w-[16px] h-[16px]" />
             <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
               Land
             </span>
           </div>
         </NavLink>
 
-        {/* Supplier */}
         <NavLink className={linkClasses} to="supplier">
           <div className="flex items-center gap-2 text-[#067528]">
-            <FaTruck className="w-[16px] h-[16px]" />
+            <FaPeopleCarry className="w-[16px] h-[16px]" />
             <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
               Vendors
             </span>
@@ -150,7 +156,7 @@ const Sidebar = () => {
         {/* Store */}
         <NavLink className={linkClasses} to="store">
           <div className="flex items-center gap-2 text-[#067528]">
-            <FaWarehouse className="w-[16px] h-[16px]" />
+            <FaStore className="w-[16px] h-[16px]" />
             <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
               Store
             </span>
@@ -170,11 +176,11 @@ const Sidebar = () => {
         <div className="relative">
           <div
             className={linkClasses({ isActive: false })}
-            onClick={() => setIsHaariDropdownOpen(!isHaariDropdownOpen)}
+            onClick={() => setIsStockDropdownOpen(!isStockDropdownOpen)}
           >
             <div className="flex items-center justify-between w-full cursor-pointer transition-all">
               <div className="flex items-center gap-2  text-[#067528]">
-                <FaUser className="w-[16px] h-[16px]" />
+                <FaWarehouse className="w-[16px] h-[16px]" />
                 <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
                   Stock
                 </span>
@@ -182,7 +188,7 @@ const Sidebar = () => {
 
               <span
                 className={`transition-transform ml-20 text-black duration-300 ${
-                  isHaariDropdownOpen ? "rotate-180" : "rotate-0"
+                  isStockDropdownOpen ? "rotate-180" : "rotate-0"
                 }`}
               >
                 ▼
@@ -190,7 +196,7 @@ const Sidebar = () => {
             </div>
           </div>
 
-          {isHaariDropdownOpen && (
+          {isStockDropdownOpen && (
             <div className="flex flex-col ml-6 mt-1 gap-1">
               {/* Haari link */}
               <NavLink className={linkClasses} to="stock_consume">
@@ -210,12 +216,50 @@ const Sidebar = () => {
         </div>
         <NavLink className={linkClasses} to="chartsofaccounts">
           <div className="flex items-center gap-2 text-[#067528]">
-            <FaBox className="w-[16px] h-[16px]" />
+            <FaChartLine className="w-[16px] h-[16px]" />
             <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
               Charts of Accounts
             </span>
           </div>
         </NavLink>
+        <div className="relative">
+          <div
+            className={linkClasses({ isActive: false })}
+            onClick={() => setIsVoucherDropdownOpen(!isVoucherDropdownOpen)}
+          >
+            <div className="flex items-center justify-between w-full cursor-pointer transition-all">
+              <div className="flex items-center gap-2  text-[#067528]">
+                <FaReceipt className="w-[16px] h-[16px]" />
+                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
+                  Vouchers
+                </span>
+              </div>
+
+              <span
+                className={`transition-transform ml-20 text-black duration-300 ${
+                  isVoucherDropdownOpen ? "rotate-180" : "rotate-0"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+
+          {isVoucherDropdownOpen && (
+            <div className="flex flex-col ml-6 mt-1 gap-1">
+              <NavLink className={linkClasses} to="paymentvoucher">
+                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
+                  Payment Voucher
+                </span>
+              </NavLink>
+              <NavLink className={linkClasses} to="recievevoucher">
+                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
+                  Recieve Voucher
+                </span>
+              </NavLink>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

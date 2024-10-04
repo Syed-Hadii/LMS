@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Suppliers = () => {
   const url = "http://localhost:3002";
@@ -14,6 +16,10 @@ const Suppliers = () => {
   });
   const [editingSupplierId, setEditingSupplierId] = useState(null);
   const [editableData, setEditableData] = useState({});
+   const [searchQuery, setSearchQuery] = useState("");
+   const filteredSupplier = supplierList.filter((supplier) =>
+     supplier.name?.toLowerCase().includes(searchQuery.toLowerCase())
+   );
 
   const fetchSupplier = async () => {
     try {
@@ -28,6 +34,7 @@ const Suppliers = () => {
     e.preventDefault();
     try {
       await axios.post(`${url}/supplier/add`, newSupplier);
+             toast.success("Vendor Added Successfully!");
       setShowAddForm(false);
       setNewSupplier({ name: "", phone: "",nic:"", amount: "" });
       fetchSupplier();
@@ -93,7 +100,9 @@ const Suppliers = () => {
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Accounts"
+            placeholder="Search Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -230,7 +239,7 @@ const Suppliers = () => {
           </tr>
         </thead>
         <tbody>
-          {supplierList.map((supplier) => (
+          {filteredSupplier.map((supplier) => (
             <tr
               key={supplier._id}
               className="border-b text-gray-700 text-sm hover:bg-gray-100"

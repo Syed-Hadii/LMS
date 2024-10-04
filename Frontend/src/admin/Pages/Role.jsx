@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus, FaEdit, FaTrash, FaBan } from "react-icons/fa";
+import { FaPlus,FaSave, FaTimes ,FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 
 const Role = () => {
   const url = "http://localhost:3002";
@@ -10,7 +10,6 @@ const Role = () => {
   const [editingRoleId, setEditingRoleId] = useState(null);
   const [editableRole, setEditableRole] = useState("");
 
-  // Fetch roles
   const fetchRoles = async () => {
     try {
       const response = await axios.get(`${url}/adduser/getrole`);
@@ -31,9 +30,9 @@ const Role = () => {
         role: newRole,
       });
       if (response.data.success) {
-        fetchRoles(); // Refresh roles list
+        fetchRoles(); 
         setNewRole("");
-        setShowAddForm(false); // Close the form
+        setShowAddForm(false); 
       }
     } catch (error) {
       console.error("Error adding role:", error);
@@ -46,7 +45,7 @@ const Role = () => {
         id: roleId,
       });
       if (response.data.success) {
-        fetchRoles(); // Refresh roles list
+        fetchRoles(); 
       }
     } catch (error) {
       console.log("Error removing role:", error);
@@ -69,7 +68,7 @@ const Role = () => {
         role: editableRole,
       });
       if (response.data.success) {
-        fetchRoles(); // Refresh roles list
+        fetchRoles(); 
         setEditingRoleId(null);
         setEditableRole("");
       }
@@ -85,17 +84,28 @@ const Role = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold ml-[30vw]">Roles List</h1>
-      <button
-        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
-        onClick={() => {
-          setNewRole(""); // Reset newRole
-          setShowAddForm(true);
-        }}
-      >
-        <FaPlus className="text-sm" />
-        Add Role
-      </button>
+      <h1 className="text-xl mb-5 font-semibold text-left">Role List</h1>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Accounts"
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => setShowAddForm(true)}
+          >
+            <FaPlus className="text-sm" />
+            Add Roll
+          </button>
+        </div>
+      </div>
 
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -154,42 +164,42 @@ const Role = () => {
                     type="text"
                     value={editableRole}
                     onChange={handleEditChange}
-                    className="border rounded px-2"
+                    className="border rounded px-2 w-40"
                   />
                 ) : (
                   role.role
                 )}
               </td>
               <td className="py-3 px-4">Permission Details</td>
-              <td className="py-3 px-4 flex space-x-2">
+              <td className="py-3 px-4 flex">
                 {editingRoleId === role._id ? (
                   <>
                     <button
-                      className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"
+                      className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={handleSaveEdit}
                     >
-                      <FaEdit className="inline-block mr-1" /> Save
+                      <FaSave className="text-sm" />
                     </button>
                     <button
-                      className="bg-transparent text-red-500 hover:bg-red-100 rounded py-1 px-3"
+                      className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
                       onClick={handleCancelEdit}
                     >
-                      <FaBan className="inline-block mr-1" /> Cancel
+                      <FaTimes className="text-sm" />
                     </button>
                   </>
                 ) : (
                   <>
                     <button
-                      className="bg-transparent text-blue-500 hover:bg-blue-100 rounded py-1 px-3"
+                      className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={() => handleEditClick(role)}
                     >
-                      <FaEdit className="inline-block mr-1" />
+                      <FaEdit className="text-sm" />
                     </button>
                     <button
-                      className="bg-transparent text-red-500 hover:bg-red-100 rounded py-1 px-3"
+                      className="text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
                       onClick={() => handleRemoveRole(role._id)}
                     >
-                      <FaTrash className="inline-block" />
+                      <FaTrash className="text-sm" />
                     </button>
                   </>
                 )}

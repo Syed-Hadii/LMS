@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+
 
 const User = () => {
   const url = "http://localhost:3002";
@@ -103,6 +104,10 @@ const User = () => {
       console.error("Error adding user:", error);
     }
   };
+   const handleCancelEdit = () => {
+     setEditingUserId(null);
+     setEditableData({});
+   };
 
   const resetForm = () => {
     setNewUser({
@@ -116,18 +121,28 @@ const User = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold text-center">Users List</h1>
-
-      <button
-        className="bg-[#067528]  text-white font-semibold px-4  flex items-center gap-2  rounded-md py-2 mb-5"
-        onClick={() => {
-          resetForm();
-          setShowAddForm(true);
-        }}
-      >
-        <FaPlus className="text-sm " />
-        Add User
-      </button>
+      <h1 className="text-xl mb-5 font-semibold text-left">Users List</h1>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Accounts"
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => setShowAddForm(true)}
+          >
+            <FaPlus className="text-sm" />
+            Add User
+          </button>
+        </div>
+      </div>
 
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -234,7 +249,7 @@ const User = () => {
                     name="full_name"
                     value={editableData.full_name}
                     onChange={handleEditChange}
-                    className="border rounded px-2"
+                    className="border rounded px-2 w-40"
                   />
                 ) : (
                   user.full_name
@@ -247,7 +262,7 @@ const User = () => {
                     name="email"
                     value={editableData.email}
                     onChange={handleEditChange}
-                    className="border rounded px-2"
+                    className="border rounded px-2 w-40"
                   />
                 ) : (
                   user.email
@@ -259,7 +274,7 @@ const User = () => {
                     name="role"
                     value={editableData.role}
                     onChange={handleEditChange}
-                    className="border rounded px-2"
+                    className="border rounded px-2 w-44"
                   >
                     {roles.map((role) => (
                       <option key={role._id} value={role._id}>
@@ -271,28 +286,38 @@ const User = () => {
                   roles.find((role) => role._id === user.role)?.role
                 )}
               </td>
-              <td className="py-3 px-4">
+              <td className="py-3 px-4 flex">
                 {editingUserId === user._id ? (
-                  <button
-                    className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"
-                    onClick={handleSaveClick}
-                  >
-                    <FaSave />
-                  </button>
+                  <>
+                    <button
+                      className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      onClick={handleSaveClick}
+                    >
+                      <FaSave className="text-sm" />
+                    </button>
+                    <button
+                      className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                      onClick={handleCancelEdit}
+                    >
+                      <FaTimes className="text-sm" />
+                    </button>
+                  </>
                 ) : (
-                  <button
-                    className="bg-transparent text-blue-500 hover:bg-blue-100 rounded py-1 px-3"
-                    onClick={() => handleEditClick(user)}
-                  >
-                    <FaEdit className="inline-block mr-1" />
-                  </button>
+                  <>
+                    <button
+                      className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      onClick={() => handleEditClick(user)}
+                    >
+                      <FaEdit className="text-sm" />
+                    </button>
+                    <button
+                      className="text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
+                      onClick={() => handleRemove(user._id)}
+                    >
+                      <FaTrash className="text-sm" />
+                    </button>
+                  </>
                 )}
-                <button
-                  className="bg-transparent text-red-500 hover:bg-red-100 rounded py-1 px-3 ml-2"
-                  onClick={() => handleRemove(user._id)}
-                >
-                  <FaTrash className="inline-block" />
-                </button>
               </td>
             </tr>
           ))}

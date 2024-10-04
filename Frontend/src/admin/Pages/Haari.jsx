@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 
 const Haari = () => {
   const url = "http://localhost:3002";
@@ -35,7 +35,7 @@ const Haari = () => {
       await axios.post(`${url}/haari/addhaari`, newHaari);
       setShowAddForm(false);
       setNewHaari({ name: "", address: "", phone: "", nic: "" });
-      fetchHaari(); // Refresh the list
+      fetchHaari(); 
     } catch (error) {
       console.log("Error adding Haari:", error);
     }
@@ -62,8 +62,8 @@ const Haari = () => {
       });
       if (response.data.success) {
         console.log("Haari updated successfully");
-        setEditingHaariId(null); // Exit editing mode
-        fetchHaari(); // Refresh the list to get updated data from backend
+        setEditingHaariId(null); 
+        fetchHaari(); 
       } else {
         console.log("Error updating user");
       }
@@ -73,8 +73,8 @@ const Haari = () => {
   };
 
   const handleCancelEdit = () => {
-    setEditingHaariId(null); // Exit editing mode
-    setEditableData({}); // Reset editable data
+    setEditingHaariId(null); 
+    setEditableData({}); 
   };
 
   const removeHaari = async (haariId) => {
@@ -99,14 +99,28 @@ const Haari = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold ml-[30vw]">Roles List</h1>
-      <button
-        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
-        onClick={() => setShowAddForm(true)}
-      >
-        <FaPlus className="text-sm" />
-        Add User
-      </button>
+      <h1 className="text-xl mb-5 font-semibold text-left">Haari List</h1>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Accounts"
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => setShowAddForm(true)}
+          >
+            <FaPlus className="text-sm" />
+            Add Haari
+          </button>
+        </div>
+      </div>
 
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -114,7 +128,6 @@ const Haari = () => {
             <h1 className="text-lg font-semibold mb-5">Add Haari</h1>
             <hr className="mb-6 border-gray-400" />
             <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Name Input */}
               <div className="text-left">
                 <label
                   className="block text-gray-700 font-semibold mb-1"
@@ -133,8 +146,6 @@ const Haari = () => {
                   required
                 />
               </div>
-
-              {/* Phone Input */}
               <div className="text-left">
                 <label
                   className="block text-gray-700 font-semibold mb-1"
@@ -153,8 +164,6 @@ const Haari = () => {
                   required
                 />
               </div>
-
-              {/* Address Input */}
               <div className="text-left">
                 <label
                   className="block text-gray-700 font-semibold mb-1"
@@ -173,8 +182,6 @@ const Haari = () => {
                   required
                 />
               </div>
-
-              {/* NIC Input */}
               <div className="text-left">
                 <label
                   className="block text-gray-700 font-semibold mb-1"
@@ -193,8 +200,6 @@ const Haari = () => {
                   required
                 />
               </div>
-
-              {/* Buttons */}
               <div className="pt-8 flex float-right gap-7">
                 <button
                   className="text-red-600 font-semibold px-3 py-1 rounded-md"
@@ -293,13 +298,13 @@ const Haari = () => {
                 ) : (
                   <>
                     <button
-                      className="bg-blue-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      className=" text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={() => handleEditClick(haari)}
                     >
                       <FaEdit className="text-sm" />
                     </button>
                     <button
-                      className="bg-red-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                      className=" text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
                       onClick={() => removeHaari(haari._id)}
                     >
                       <FaTrash className="text-sm" />

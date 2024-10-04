@@ -17,6 +17,14 @@ const ChartAccountSchema = mongoose.Schema({
           type: String,
           required: true,
         },
+        amount: {
+          type: Number,
+          required: true,
+        },
+        account_nature: {
+          type: String,
+          required: true,
+        },
       },
     ],
     default: undefined,

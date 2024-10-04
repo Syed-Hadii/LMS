@@ -1,415 +1,289 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaSearch, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import axios from "axios";
 
 const ChartsofAccounts = () => {
   const url = "http://localhost:3002";
   const [showAddForm, setShowAddForm] = useState(false);
-  const [banksList, setBanksList] = useState([]);
-  const [newBank, setNewBank] = useState({
-    main_account: "", 
-    sub_account: "",
+  const [accountList, setAccountList] = useState([]);
+  const [expandedAccounts, setExpandedAccounts] = useState({}); // Track expanded state for each main account
+  const [newAccount, setNewAccount] = useState({
+    parent_id: "",
     account_name: "",
-    initial_amount: "", // Keep this as string to accommodate input handling
-    nature_of_account: [], // Array to store Debit/Credit selection
+    initial_amount: "",
+    account_nature: "",
   });
 
-  const [editingBankId, setEditingBankId] = useState(null);
-  const [editableData, setEditableData] = useState({});
-
-  const fetchbank = async () => {
+  const fetchChartAccount = async () => {
     try {
-      const response = await axios.get(`${url}/bank/get`);
-      setBanksList(response.data.data);
+      const response = await axios.get(`${url}/chartaccount/get`);
+      setAccountList(response.data.data);
     } catch (error) {
-      console.log("Error fetching bank records:", error);
+      console.log("Error fetching chartaccount records:", error);
     }
   };
 
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${url}/bank/add`, newBank);
+      let newChartAccount;
+
+      if (newAccount.parent_id) {
+        // Adding a sub-account
+        newChartAccount = {
+          name: accountList.find(
+            (account) => account._id === newAccount.parent_id
+          )?.name, // Set main account name
+          subCat: [
+            {
+              parent_id: newAccount.parent_id,
+              name: newAccount.account_name, // Sub-account name
+              amount: parseFloat(newAccount.initial_amount),
+              account_nature: newAccount.account_nature,
+            },
+          ],
+        };
+      } else {
+        // Adding a main account
+        newChartAccount = {
+          name: newAccount.account_name, // Main account name
+          subCat: [],
+        };
+      }
+
+      await axios.post(`${url}/chartaccount/add`, newChartAccount);
       setShowAddForm(false);
-      setNewBank({
-        main_account: "",
-        sub_account: "",
+      setNewAccount({
+        parent_id: "",
         account_name: "",
         initial_amount: "",
-        nature_of_account: [],
+        account_nature: "",
       });
-      fetchbank();
+      fetchChartAccount();
     } catch (error) {
-      console.log("Error adding bank:", error);
+      console.log("Error adding chartaccount:", error);
     }
+  };
+
+  const toggleExpand = (accountId) => {
+    setExpandedAccounts((prevExpanded) => ({
+      ...prevExpanded,
+      [accountId]: !prevExpanded[accountId],
+    }));
   };
 
   const handleNatureChange = (e) => {
     const { value } = e.target;
-    setNewBank((prevBank) => {
-      // Toggle selection of Debit/Credit
-      if (prevBank.nature_of_account.includes(value)) {
-        return {
-          ...prevBank,
-          nature_of_account: prevBank.nature_of_account.filter(
-            (item) => item !== value
-          ),
-        };
-      } else {
-        return {
-          ...prevBank,
-          nature_of_account: [...prevBank.nature_of_account, value],
-        };
-      }
-    });
-  };
-
-  const handleEditClick = (bank) => {
-    setEditingBankId(bank._id);
-    setEditableData(bank);
-  };
-
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditableData((prevData) => ({
-      ...prevData,
-      [name]: value,
+    setNewAccount((prevchartaccount) => ({
+      ...prevchartaccount,
+      account_nature: value,
     }));
-  };
-
-  const handleSaveClick = async () => {
-    try {
-      await axios.put(`${url}/bank/update`, {
-        id: editableData._id,
-        ...editableData,
-      });
-      setEditingBankId(null);
-      fetchbank();
-    } catch (error) {
-      console.error("Error updating bank:", error);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingBankId(null);
-    setEditableData({});
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${url}/bank/delete`, { data: { id } });
-      fetchbank();
-    } catch (error) {
-      console.log("Error deleting bank:", error);
-    }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewBank({ ...newBank, [name]: value });
+    setNewAccount({ ...newAccount, [name]: value });
   };
 
   useEffect(() => {
-    fetchbank();
+    fetchChartAccount();
   }, []);
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold text-center">
-        Accounts List
-      </h1>
-      <button
-        className="bg-[#067528] text-white font-semibold px-4  flex items-center gap-2  rounded-md py-2 mb-5"
-        onClick={() => {
-          setShowAddForm(true);
-        }}
-      >
-        <FaPlus className="text-sm " />
-        Add Accountant
-      </button>
+      <h1 className="text-xl mb-5 font-semibold text-left">Accounts List</h1>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Accounts"
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => setShowAddForm(true)}
+          >
+            <FaPlus className="text-sm" />
+            Add Accountant
+          </button>
+        </div>
+      </div>
+
+      {/* Display Accounts */}
+      <div className="space-y-4">
+        {accountList.map((account) => (
+          <div
+            key={account._id}
+            className="border rounded-lg p-4 bg-white shadow-md"
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold">{account.name}</h2>
+              <button
+                className="text-gray-500"
+                onClick={() => toggleExpand(account._id)}
+              >
+                {expandedAccounts[account._id] ? (
+                  <FaChevronUp />
+                ) : (
+                  <FaChevronDown />
+                )}
+              </button>
+            </div>
+
+            {/* Show sub-accounts if the account is expanded */}
+            {expandedAccounts[account._id] && account.subCat.length > 0 && (
+              <div className="mt-4 space-y-3">
+                <h3 className="text-md font-semibold">Sub-Accounts:</h3>
+                <table className="min-w-full border">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="px-4 py-2 text-left">Sub-Account Name</th>
+                      <th className="px-4 py-2 text-left">Amount</th>
+                      <th className="px-4 py-2 text-left">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {account.subCat.map((sub) => (
+                      <tr key={sub._id} className="border-b">
+                        <td className="px-4 py-2">{sub.name}</td>
+                        <td className="px-4 py-2">{sub.amount}</td>
+                        <td className="px-4 py-2">{sub.account_nature}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
 
       {/* Add Form */}
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 text-center rounded shadow-lg w-[650px] h-auto mt-10">
             <h1 className="text-lg font-semibold mb-5">Add Accountant</h1>
-            <hr className="mb-6 border-gray-400" />
             <form className="space-y-6" onSubmit={handleAdd}>
-              {/* Flex container for two fields per row */}
-              <div className="flex gap-4">
-                {/* Main Account Dropdown */}
-                <div className="w-1/2 text-left">
-                  <label
-                    className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="main_account"
-                  >
-                    Main Account
-                  </label>
-                  <select
-                    id="main_account"
-                    name="main_account"
-                    value={newBank.main_account}
-                    onChange={handleChange}
-                    className="border w-full px-2 outline-none py-2 rounded-md"
-                    required
-                  >
-                    <option value="" disabled>
-                      Select Main Account
-                    </option>
-                    <option value="MainAccount1">Main Account 1</option>
-                    <option value="MainAccount2">Main Account 2</option>
-                    {/* Add more options as needed */}
-                  </select>
-                </div>
-
-                {/* Sub Account Dropdown */}
-                <div className="w-1/2 text-left">
-                  <label
-                    className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="sub_account"
-                  >
-                    Sub Account
-                  </label>
-                  <select
-                    id="sub_account"
-                    name="sub_account"
-                    value={newBank.sub_account}
-                    onChange={handleChange}
-                    className="border w-full px-2 outline-none py-2 rounded-md"
-                    required
-                  >
-                    <option value="" disabled>
-                      Select Sub Account
-                    </option>
-                    <option value="SubAccount1">Sub Account 1</option>
-                    <option value="SubAccount2">Sub Account 2</option>
-                    {/* Add more options as needed */}
-                  </select>
-                </div>
-              </div>
-
-              {/* Account Name and Initial Amount */}
-              <div className="flex gap-4">
-                <div className="w-1/2 text-left">
-                  <label
-                    className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="account_name"
-                  >
-                    Account Name
-                  </label>
-                  <input
-                    type="text"
-                    id="account_name"
-                    name="account_name"
-                    value={newBank.account_name}
-                    onChange={handleChange}
-                    className="border w-full px-2 outline-none py-2 rounded-md"
-                    placeholder="Enter Account Name"
-                    required
-                  />
-                </div>
-                <div className="w-1/2 text-left">
-                  <label
-                    className="block text-gray-700 font-semibold mb-1"
-                    htmlFor="initial_amount"
-                  >
-                    Initial Amount
-                  </label>
-                  <input
-                    type="number"
-                    id="initial_amount"
-                    name="initial_amount"
-                    value={newBank.initial_amount}
-                    onChange={handleChange}
-                    className="border w-full px-2 outline-none py-2 rounded-md"
-                    placeholder="Enter Initial Amount"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Nature of Account with animated checkboxes */}
-              <div className="text-left">
-                <label className="block text-gray-700 font-semibold mb-1">
-                  Nature of Account
+              <div className="w-full text-left">
+                <label
+                  className="block text-gray-700 font-semibold mb-1"
+                  htmlFor="parent_id"
+                >
+                  Main Account
                 </label>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="nature_of_account"
-                      value="Debit"
-                      className="rounded-full h-5 w-5 transition-all "
-                      onChange={handleNatureChange}
-                    />
-                    <span>Debit</span>
-                  </label>
-
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="nature_of_account"
-                      value="Credit"
-                      className="rounded-full h-5 w-5 transition-all "
-                      onChange={handleNatureChange}
-                    />
-                    <span>Credit</span>
-                  </label>
-                </div>
+                <select
+                  id="parent_id"
+                  name="parent_id"
+                  value={newAccount.parent_id}
+                  onChange={handleChange}
+                  className="border w-full px-2 outline-none py-2 rounded-md"
+                >
+                  <option value="">Select Main Account</option>
+                  {accountList.map((account) => (
+                    <option key={account._id} value={account._id}>
+                      {account.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Buttons */}
-              <div className="pt-8 flex justify-end gap-7">
+              <div className="w-full text-left">
+                <label
+                  className="block text-gray-700 font-semibold mb-1"
+                  htmlFor="account_name"
+                >
+                  Account Name
+                </label>
+                <input
+                  type="text"
+                  id="account_name"
+                  name="account_name"
+                  value={newAccount.account_name}
+                  onChange={handleChange}
+                  className="border w-full px-2 outline-none py-2 rounded-md"
+                  placeholder="Enter Account Name"
+                  required
+                />
+              </div>
+
+              {newAccount.parent_id && (
+                <>
+                  <div className="w-full text-left">
+                    <label
+                      className="block text-gray-700 font-semibold mb-1"
+                      htmlFor="initial_amount"
+                    >
+                      Initial Amount
+                    </label>
+                    <input
+                      type="number"
+                      id="initial_amount"
+                      name="initial_amount"
+                      value={newAccount.initial_amount}
+                      onChange={handleChange}
+                      className="border w-full px-2 outline-none py-2 rounded-md"
+                      placeholder="Enter Initial Amount"
+                      required
+                    />
+                  </div>
+
+                  <div className="w-full text-left">
+                    <label className="block text-gray-700 font-semibold mb-1">
+                      Nature of Account
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="account_nature"
+                          value="Debit"
+                          onChange={handleNatureChange}
+                          checked={newAccount.account_nature === "Debit"}
+                          className="rounded-full h-5 w-5"
+                        />
+                        <span>Debit</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="account_nature"
+                          value="Credit"
+                          onChange={handleNatureChange}
+                          checked={newAccount.account_nature === "Credit"}
+                          className="rounded-full h-5 w-5"
+                        />
+                        <span>Credit</span>
+                      </label>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="text-center space-x-4">
                 <button
-                  className="text-red-600 font-semibold px-3 py-1 rounded-md"
                   type="button"
                   onClick={() => setShowAddForm(false)}
+                  className="text-red-500 font-semibold rounded-md px-4 py-2"
                 >
                   Cancel
                 </button>
                 <button
-                  className="bg-blue-500 hover:bg-blue-600 transition-all text-white px-3 py-1 rounded-md"
                   type="submit"
+                  className="bg-[#067528] text-white font-semibold rounded-md px-4 py-2"
                 >
-                  Submit
+                  Add Account
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      <table className="min-w-full max-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Bank Name
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Bank Type
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Bank Name
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Bank Account Number
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Bank Address
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* {banksList.map((bank) => (
-            <tr
-              key={bank._id}
-              className="border-b text-gray-700 text-sm hover:bg-gray-100"
-            >
-              <td className="py-3 px-4 max-w-xs">
-                {editingBankId === bank._id ? (
-                  <input
-                    type="text"
-                    name="account_name"
-                    value={editableData.account_name}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  bank.account_name
-                )}
-              </td>
-              <td className="py-3 px-4 max-w-xs">
-                {editingBankId === bank._id ? (
-                  <input
-                    type="text"
-                    name="type"
-                    value={editableData.type}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  bank.type
-                )}
-              </td>
-              <td className="py-3 px-4 max-w-xs">
-                {editingBankId === bank._id ? (
-                  <input
-                    type="text"
-                    name="bank_name"
-                    value={editableData.bank_name}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  bank.bank_name
-                )}
-              </td>
-              <td className="py-3 px-4 max-w-xs text-center">
-                {editingBankId === bank._id ? (
-                  <input
-                    type="text"
-                    name="number"
-                    value={editableData.number}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-28"
-                  />
-                ) : (
-                  bank.number
-                )}
-              </td>
-              <td className="py-3 px-4 max-w-xs">
-                {editingBankId === bank._id ? (
-                  <input
-                    type="text"
-                    name="address"
-                    value={editableData.address}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  bank.address
-                )}
-              </td>
-              <td className="py-3 px-4 flex">
-                {editingBankId === bank._id ? (
-                  <>
-                    <button
-                      className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
-                      onClick={handleSaveClick}
-                    >
-                      <FaSave className="text-sm" />
-                    </button>
-                    <button
-                      className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
-                      onClick={handleCancelEdit}
-                    >
-                      <FaTimes className="text-sm" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className="bg-blue-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
-                      onClick={() => handleEditClick(bank)}
-                    >
-                      <FaEdit className="text-sm" />
-                    </button>
-                    <button
-                      className="bg-red-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
-                      onClick={() => handleDelete(bank._id)}
-                    >
-                      <FaTrash className="text-sm" />
-                    </button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))} */}
-        </tbody>
-      </table>
     </div>
   );
 };

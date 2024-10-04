@@ -12,7 +12,7 @@ const Dashboard = () => {
         <h2 className="text-[17px] md:text-[20px] text-gray-700">Analytics</h2>
         <div className="flex text-[13px] md:text-[14px] items-center gap-1 mt-2 md:mt-0">
           <span className="text-gray-400">Dashboard</span>{" "}
-          <FaChevronRight className="text-gray-400 text-[7px] md:text-[10px] mr-1" />{" "}
+          <FaChevronRight className="text-gray-400 text-[7px] md:text-[10px] mr-1" />
           <span className="text-gray-600">Analytics</span>
         </div>
       </div>

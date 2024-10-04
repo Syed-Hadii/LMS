@@ -11,7 +11,6 @@ const Land = () => {
   const [editingLandId, setEditingLandId] = useState(null);
   const [editableData, setEditableData] = useState({});
 
-  // Fetch land records
   const fetchLandRecords = async () => {
     try {
       const response = await axios.get(`${url}/land/list_land`);
@@ -24,7 +23,7 @@ const Land = () => {
   };
 
   useEffect(() => {
-    fetchLandRecords(); // Fetch records on component mount
+    fetchLandRecords(); 
   }, []);
 
   const handleAddLand = async (e) => {
@@ -35,7 +34,7 @@ const Land = () => {
         area: newLandArea,
       });
       if (response.data.success) {
-        fetchLandRecords(); // Refresh land records after adding
+        fetchLandRecords(); 
         setNewLandName("");
         setNewLandArea("");
         setShowAddForm(false);
@@ -86,10 +85,9 @@ const Land = () => {
     setEditableData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Handle cancel edit
   const handleCancelEdit = () => {
     setEditingLandId(null);
-    setEditableData({}); // Reset editable data
+    setEditableData({}); 
   };
 
   return (
@@ -157,7 +155,6 @@ const Land = () => {
             {landRecords.map((land) => (
               <tr key={land._id} className="border-b border-gray-200">
                 {editingLandId === land._id ? (
-                  // Editable Row
                   <>
                     <td className="py-3 px-3 text-left ">
                       <input
@@ -195,7 +192,6 @@ const Land = () => {
                     </td>
                   </>
                 ) : (
-                  // Non-editable Row
                   <>
                     <td className="py-3 px-6 text-left">{land.name}</td>
                     <td className="py-3 px-6 text-left">{land.area}</td>
@@ -203,13 +199,13 @@ const Land = () => {
                       <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleEditClick(land)}
-                          className="bg-blue-500 text-white rounded px-2 py-1"
+                          className=" text-green-600 rounded px-2 py-1"
                         >
                           <FaEdit />
                         </button>
                         <button
                           onClick={() => removeLand(land._id)}
-                          className="bg-red-500 text-white rounded px-2 py-1"
+                          className=" text-red-500 rounded px-2 py-1"
                         >
                           <FaTrash />
                         </button>

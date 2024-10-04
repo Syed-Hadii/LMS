@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 import axios from "axios";
 
 const LandxHaari = () => {
@@ -54,7 +54,6 @@ const LandxHaari = () => {
   const fetchLandxHaari = async () => {
     try {
       const response = await axios.get(`${url}/landxhaari/get`);
-      // console.log(response.data);
       setLandxHaariList(response.data.data);
     } catch (error) {
       console.error("Error fetching LandxHaari:", error);
@@ -86,7 +85,6 @@ const LandxHaari = () => {
 const handleEdit = async (e, haariId, land) => {
   e.preventDefault();
   try {
-    // console.log(land._id);
     const updatedLand = {
       haariId: haariId,
       landId: [
@@ -132,7 +130,7 @@ const handleCancelEdit = () => {
        Id: landId,
      });
      if (response.data.success) {
-       fetchLandxHaari(); // Refresh the list after deletion
+       fetchLandxHaari(); 
        console.log("Delete successful:", response.data.message);
      } else {
        console.error("Delete failed:", response.data.message);
@@ -149,34 +147,48 @@ const handleCancelEdit = () => {
   }, []);
   useEffect(() => {
     console.log("Updated landxHaariList:", landxHaariList);
-    // console.log(landxHaariList.haariId[0]);
   }, [landxHaariList]);
  
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold text-center">
+      <h1 className="text-xl mb-5 font-semibold text-left">
         Assigned Lands to Haaries
       </h1>
-      <button
-        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
-        onClick={() => {
-          setShowAddForm(true);
-          setNewLand({
-            haariId: "",
-            land: [
-              {
-                land_id: "",
-                crop_name: "",
-                start_date: "",
-                end_date: "",
-                details: "",
-              },
-            ],
-          });
-        }}
-      >
-        <FaPlus className="text-sm" /> Assign Land
-      </button>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Accounts"
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => {
+              setShowAddForm(true);
+              setNewLand({
+                haariId: "",
+                land: [
+                  {
+                    land_id: "",
+                    crop_name: "",
+                    start_date: "",
+                    end_date: "",
+                    details: "",
+                  },
+                ],
+              });
+            }}
+          >
+            <FaPlus className="text-sm" /> Assign Land
+          </button>
+        </div>
+      </div>
+
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 text-center rounded shadow-lg w-[650px] h-auto mt-10">
@@ -219,7 +231,8 @@ const handleCancelEdit = () => {
                     Land ID
                   </label>
                   <select
-                    value={newLand.land[0].land_id} // Update this line to reflect the correct structure
+                    value={newLand.land[0].land_id}
+                    z
                     className="border w-full px-2 outline-none py-2 rounded-md text-black bg-white"
                     onChange={(e) => {
                       setNewLand({
@@ -377,7 +390,6 @@ const handleCancelEdit = () => {
         </div>
       )}
 
-      {/* Display LandxHaari List */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
           <thead className="bg-gray-200">
@@ -592,7 +604,7 @@ const handleCancelEdit = () => {
                               ],
                             });
                           }}
-                          className="bg-blue-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                          className=" text-green-600 py-1 px-2 rounded-md flex items-center gap-2"
                         >
                           <FaEdit />
                         </button>
@@ -600,7 +612,7 @@ const handleCancelEdit = () => {
                           onClick={() =>
                             handleDelete(haariItem.haariId._id, land._id)
                           }
-                          className="bg-red-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                          className=" text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
                         >
                           <FaTrash />
                         </button>

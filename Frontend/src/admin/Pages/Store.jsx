@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 
 const Store = () => {
   const url = "http://localhost:3002";
@@ -10,7 +10,6 @@ const Store = () => {
   const [editingStoreId, setEditingStoreId] = useState(null);
   const [editableStore, setEditableStore] = useState("");
 
-  // Fetch stores
   const fetchStores = async () => {
     try {
       const response = await axios.get(`${url}/store/get`);
@@ -90,17 +89,31 @@ const Store = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold ml-[30vw]">Stores List</h1>
-      <button
-        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
-        onClick={() => {
-          setNewStore("");
-          setShowAddForm(true);
-        }}
-      >
-        <FaPlus className="text-sm" />
-        Add Store
-      </button>
+      <h1 className="text-xl mb-5 font-semibold text-left">Stores List</h1>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Accounts"
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => {
+              setNewStore("");
+              setShowAddForm(true);
+            }}
+          >
+            <FaPlus className="text-sm" />
+            Add Store
+          </button>
+        </div>
+      </div>
 
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -148,7 +161,6 @@ const Store = () => {
             {stores.map((store) => (
               <tr key={store._id} className="border-b border-gray-200">
                 {editingStoreId === store._id ? (
-                  // Editable Row
                   <>
                     <td className="py-3 px-4 text-left">
                       <input
@@ -176,20 +188,19 @@ const Store = () => {
                     </td>
                   </>
                 ) : (
-                  // Non-editable Row
                   <>
                     <td className="py-3 px-6 text-left">{store.name}</td>
                     <td className="py-3 px-6 text-center">
                       <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleEditClick(store)}
-                          className="bg-blue-500 text-white rounded px-2 py-1"
+                          className="text-green-600 rounded px-2 py-1"
                         >
                           <FaEdit />
                         </button>
                         <button
                           onClick={() => handleRemoveStore(store._id)}
-                          className="bg-red-500 text-white rounded px-2 py-1"
+                          className="text-red-500 rounded px-2 py-1"
                         >
                           <FaTrash />
                         </button>

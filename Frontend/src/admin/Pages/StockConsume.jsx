@@ -164,28 +164,18 @@ const StockConsume = () => {
           <thead>
             <tr>
               <th className="py-3 px-5 text-left text-gray-600 font-semibold border-b border-gray-300">
-                {" "}
-                {/* Add border for separation */}
                 Items
               </th>
               <th className="py-3 px-5 text-left text-gray-600 font-semibold border-b border-gray-300">
-                {" "}
-                {/* Add border for separation */}
                 Land Name
               </th>
               <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
-                {" "}
-                {/* Add border for separation */}
                 Stock Available
               </th>
               <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
-                {" "}
-                {/* Add border for separation */}
                 Stock Consume
               </th>
               <th className="py-3 px-9 text-left text-gray-600 font-semibold border-b border-gray-300">
-                {" "}
-                {/* Add border for separation */}
                 Actions
               </th>
             </tr>

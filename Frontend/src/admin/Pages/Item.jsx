@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 import axios from "axios";
 
 const Item = () => {
@@ -39,8 +39,6 @@ useEffect(() => {
       console.error("Error fetching items:", error);
     }
   };
-
-  // Handle Add new item
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
@@ -59,14 +57,10 @@ useEffect(() => {
       console.error("Error adding item:", error);
     }
   };
-
-  // Handle Edit Click
   const handleEditClick = (item) => {
     setEditingItemId(item._id);
     setEditableData(item);
   };
-
-  // Handle Edit Change
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditableData((prevData) => ({
@@ -74,8 +68,6 @@ useEffect(() => {
       [name]: value,
     }));
   };
-
-  // Save Edited Item
   const handleSaveClick = async () => {
     try {
       await axios.put(`${url}/items/update`, {
@@ -88,14 +80,10 @@ useEffect(() => {
       console.error("Error updating item:", error);
     }
   };
-
-  // Cancel Edit
   const handleCancelEdit = () => {
     setEditingItemId(null);
     setEditableData({});
   };
-
-  // Handle Delete
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${url}/items/delete`, { data: { id } });
@@ -104,31 +92,38 @@ useEffect(() => {
       console.error("Error deleting item:", error);
     }
   };
-
-  // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewItems({ ...newItems, [name]: value });
   };
-
-  // Fetch items on component mount
   useEffect(() => {
     fetchItems();
   }, []);
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl underline font-bold text-center">Item List</h1>
-      <button
-        className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
-        onClick={() => {
-          setShowAddForm(true);
-        }}
-      >
-        <FaPlus className="text-sm" /> Add Item
-      </button>
-
-      {/* Add Form */}
+      <h1 className="text-xl mb-5 font-semibold text-left">Users List</h1>
+      <div className="flex justify-between ">
+        <div className="border border-gray-400 rounded-md h-10 flex">
+          <input
+            type="text"
+            className="outline-none w-72 rounded-md px-2 py-1.5"
+            placeholder="Search Accounts"
+          />
+          <button className="h-full px-4 text-lg text-gray-500">
+            <FaSearch />
+          </button>
+        </div>
+        <div>
+          <button
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            onClick={() => setShowAddForm(true)}
+          >
+            <FaPlus className="text-sm" />
+            Add User
+          </button>
+        </div>
+      </div>
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 text-center rounded shadow-lg w-[650px] h-auto mt-10">

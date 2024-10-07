@@ -7,7 +7,7 @@ const PaymentForm = () => {
   const url = "http://localhost:3002";
   const [accountList, setAccountList] = useState([]);
   const [subAccounts, setSubAccounts] = useState([]);
-  const [postedDateChecked, setPostedDateChecked] = useState(false);
+  // const [postedDateChecked, setPostedDateChecked] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [bankAccount, setBankAccount] = useState("");
   const [transactionNumber, setTransactionNumber] = useState("");
@@ -74,6 +74,7 @@ const PaymentForm = () => {
 
    const submissionData = {
      voucher_no: formData.voucher_no,
+     posted_date: formData.posted_date,
      date: formData.date,
      reference: formData.reference,
      account: formData.account,
@@ -81,7 +82,7 @@ const PaymentForm = () => {
      payment_method: paymentMethod,
      paid_amount: formData.paid_amount,
      desc: formData.desc,
-     ...(postedDateChecked && { posted_date: formData.posted_date }),
+    //  ...(postedDateChecked && { posted_date: formData.posted_date }),
      ...(paymentMethod === "Bank Transfer" && {
        bank_account: bankAccount,
        transaction_number: transactionNumber,
@@ -353,7 +354,7 @@ const PaymentForm = () => {
         </div>
 
         {/* Posted Date Checkbox */}
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <label className="w-40 font-medium">Posted Date</label>
           <input
             type="checkbox"
@@ -361,7 +362,7 @@ const PaymentForm = () => {
             onChange={() => setPostedDateChecked(!postedDateChecked)}
             className="w-4 h-4"
           />
-        </div>
+        </div> */}
 
         {/* Submit Button */}
         <button

@@ -7,12 +7,13 @@ const PaymentForm = () => {
   const url = "http://localhost:3002";
   const [accountList, setAccountList] = useState([]);
   const [subAccounts, setSubAccounts] = useState([]);
-  const [postedDateChecked, setPostedDateChecked] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  // const [postedDateChecked, setPostedDateChecked] = useState(false);
+  const [recieveMethod, setrecieveMethod] = useState("Cash");
   const [bankAccount, setBankAccount] = useState("");
   const [transactionNumber, setTransactionNumber] = useState("");
   const [chequeNumber, setChequeNumber] = useState("");
   const [bankList, setBankList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     voucher_no: "",
     posted_date: new Date().toLocaleDateString("en-US"),
@@ -20,9 +21,9 @@ const PaymentForm = () => {
     reference: "",
     account: "",
     sub_account: "",
-    payment_method: "Cash",
+    recieve_method: "Cash",
     paid_amount: "",
-    memo: "",
+    desc: "",
     bank_account: "",
     transaction_number: "",
     cheque_number: "",
@@ -35,9 +36,9 @@ const PaymentForm = () => {
       reference: "",
       account: "",
       sub_account: "",
-      payment_method: "Cash",
+      recieve_method: "Cash",
       paid_amount: "",
-      memo: "",
+      desc: "",
       bank_account: "",
       transaction_number: "",
       cheque_number: "",
@@ -67,40 +68,50 @@ const PaymentForm = () => {
     fetchBank();
   }, []);
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); 
+
     const submissionData = {
       voucher_no: formData.voucher_no,
+      posted_date: formData.posted_date,
       date: formData.date,
       reference: formData.reference,
       account: formData.account,
       sub_account: formData.sub_account,
-      payment_method: paymentMethod,
+      recieve_method: recieveMethod,
       paid_amount: formData.paid_amount,
-      memo: formData.memo,
-      ...(postedDateChecked && { posted_date: formData.posted_date }),
-      ...(paymentMethod === "Bank Transfer" && {
+      desc: formData.desc,
+      // ...(postedDateChecked && { posted_date: formData.posted_date }),
+      ...(recieveMethod === "Bank Transfer" && {
         bank_account: bankAccount,
         transaction_number: transactionNumber,
       }),
-      ...(paymentMethod === "Cheque" && {
+      ...(recieveMethod === "Cheque" && {
         bank_account: bankAccount,
         cheque_number: chequeNumber,
       }),
     };
 
-    console.log(submissionData);
     try {
-      // await axios.post(`${url}/payment/create`, submissionData);
-      toast.success("Payment Voucher Created Successfully!");
-      resetForm();
+      const response = await axios.post(
+        `${url}/recievereciept/add`,
+        submissionData
+      );
+      if (response.data.success) {
+        toast.success("Payment Voucher Created Successfully!");
+        resetForm();
+      } else {
+        toast.error("Error creating payment voucher");
+      }
     } catch (error) {
-      console.error("Error submitting payment voucher:", error);
+      console.error(error);
+      toast.error("Try Again");
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
-  // Update formData state when inputs change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -111,7 +122,7 @@ const PaymentForm = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl mb-5 font-semibold text-left">Recieve Voucher</h1>
+      <h1 className="text-xl mb-5 font-semibold text-left">Payment Voucher</h1>
       <hr className="border-gray-300 border-1.5 p-4" />
       <form className="space-y-4 text-gray-700" onSubmit={handleSubmit}>
         {/* Voucher No */}
@@ -218,10 +229,10 @@ const PaymentForm = () => {
         <div className="flex items-center">
           <label className="w-40 font-medium">Recieve Method</label>
           <select
-            name="payment_method"
-            value={paymentMethod}
+            name="recieve_method"
+            value={recieveMethod}
             onChange={(e) => {
-              setPaymentMethod(e.target.value);
+              setrecieveMethod(e.target.value);
               handleInputChange(e);
             }}
             className="w-full px-4 py-2 border rounded"
@@ -234,7 +245,7 @@ const PaymentForm = () => {
         </div>
 
         {/* Conditionally Rendered Fields */}
-        {paymentMethod === "Bank Transfer" && (
+        {recieveMethod === "Bank Transfer" && (
           <>
             <div className="flex items-center">
               <label className="w-40 font-medium">Bank Account</label>
@@ -275,7 +286,7 @@ const PaymentForm = () => {
           </>
         )}
 
-        {paymentMethod === "Cheque" && (
+        {recieveMethod === "Cheque" && (
           <>
             <div className="flex items-center">
               <label className="w-40 font-medium">Cheque Number</label>
@@ -329,21 +340,21 @@ const PaymentForm = () => {
           />
         </div>
 
-        {/* Memo */}
+        {/* desc */}
         <div className="flex items-center">
-          <label className="w-40 font-medium">Memo</label>
+          <label className="w-40 font-medium">desc</label>
           <input
             type="text"
-            name="memo"
-            value={formData.memo}
+            name="desc"
+            value={formData.desc}
             onChange={handleInputChange}
             className="w-full px-4 py-2 border rounded outline-none"
-            placeholder="Enter Memo"
+            placeholder="Enter desc"
           />
         </div>
 
         {/* Posted Date Checkbox */}
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <label className="w-40 font-medium">Posted Date</label>
           <input
             type="checkbox"
@@ -351,7 +362,7 @@ const PaymentForm = () => {
             onChange={() => setPostedDateChecked(!postedDateChecked)}
             className="w-4 h-4"
           />
-        </div>
+        </div> */}
 
         {/* Submit Button */}
         <button

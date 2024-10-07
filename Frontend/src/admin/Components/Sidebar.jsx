@@ -33,7 +33,7 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`sidebar flex flex-col gap-3 pt-[22px] px-3.5 border border-t-0 border-l-0 border-gray-300 bg-white text-[#067528]  min-h-[100vh] md:w-[20%] w-[15%]`}
+      className={`sidebar flex flex-col gap-3 pt-[12px] px-3.5 border border-t-0 border-l-0 border-gray-300 bg-white text-[#067528]  min-h-[100vh] md:w-[20%] w-[15%]`}
     >
       <div className="logo mb-2.5">
         <NavLink to="/admin">
@@ -50,7 +50,7 @@ const Sidebar = () => {
         </NavLink>
       </div>
 
-      <div className="flex flex-col mt-5 gap-2 text-[10px] tracking-wider px-1.5 py-0.5">
+      <div className="flex flex-col mt-2.5 gap-1.5 text-[10px] tracking-wider px-1.5 ">
         {/* Dashboard */}
         <NavLink className={linkClasses} to="dashboard">
           <div className="flex items-center gap-2 text-[#067528] ">

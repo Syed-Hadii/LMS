@@ -16,10 +16,31 @@ const Suppliers = () => {
   });
   const [editingSupplierId, setEditingSupplierId] = useState(null);
   const [editableData, setEditableData] = useState({});
-   const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+   const [currentPage, setCurrentPage] = useState(1);
+   const rowsPerPage = 6;
    const filteredSupplier = supplierList.filter((supplier) =>
      supplier.name?.toLowerCase().includes(searchQuery.toLowerCase())
-   );
+  );
+    const [sortConfig, setSortConfig] = useState({
+      key: "name",
+      direction: "asc",
+    });
+
+    const sortedSupplier = supplierList
+      .filter((supplier) =>
+        supplier.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+  
 
   const fetchSupplier = async () => {
     try {
@@ -87,6 +108,23 @@ const Suppliers = () => {
     const { name, value } = e.target;
     setNewSupplier({ ...newSupplier, [name]: value });
   };
+    const handleSort = (key) => {
+      let direction = "asc";
+      if (sortConfig.key === key && sortConfig.direction === "asc") {
+        direction = "desc";
+      }
+      setSortConfig({ key, direction });
+    };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+   const startIndex = (currentPage - 1) * rowsPerPage;
+   const paginatedSuppliers = filteredSupplier.slice(
+     startIndex,
+     startIndex + rowsPerPage
+   );
+   const totalPages = Math.ceil(filteredSupplier.length / rowsPerPage);
 
   useEffect(() => {
     fetchSupplier();
@@ -239,7 +277,7 @@ const Suppliers = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredSupplier.map((supplier) => (
+          {paginatedSuppliers.map((supplier) => (
             <tr
               key={supplier._id}
               className="border-b text-gray-700 text-sm hover:bg-gray-100"
@@ -333,6 +371,21 @@ const Suppliers = () => {
           ))}
         </tbody>
       </table>
+      <div className="mt-4 flex justify-center">
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => handlePageChange(i + 1)}
+            className={`px-2 mx-1 border rounded ${
+              currentPage === i + 1
+                ? "bg-green-500 text-white"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

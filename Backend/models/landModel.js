@@ -8,6 +8,14 @@ const LandSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  size: {
+    type: String,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
 });
 const Land = mongoose.model("Land", LandSchema);
 export default Land;

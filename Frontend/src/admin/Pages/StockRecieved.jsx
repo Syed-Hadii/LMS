@@ -19,6 +19,7 @@ const StockRecieved = () => {
       console.error("Error fetching vendor:", error);
     }
   };
+
   const fetchItems = async () => {
     try {
       const response = await axios.get(`${url}/items/view`);
@@ -27,6 +28,7 @@ const StockRecieved = () => {
       console.error("Error fetching items:", error);
     }
   };
+
   const fetchBank = async () => {
     try {
       const response = await axios.get(`${url}/bank/get`);
@@ -57,7 +59,7 @@ const StockRecieved = () => {
       });
 
       if (response.data.success) {
-       toast.success("Stock Recieved Successfully!");
+        toast.success("Stock Recieved Successfully!");
         setAppendedItems([]);
         setSelectedVendor("");
         window.location.reload();
@@ -107,9 +109,9 @@ const StockRecieved = () => {
   }, []);
 
   return (
-    <div>
+    <div className="container mx-auto p-4">
       <h2 className="text-2xl text-center font-bold mb-10 mt-5">
-        Stock Recieved
+        Stock Received
       </h2>
       <div className="p-6 bg-gray-100 rounded-lg ">
         <div className="mb-4">
@@ -135,137 +137,138 @@ const StockRecieved = () => {
           </select>
         </div>
 
-        <table className="min-w-full bg-white border rounded-lg shadow-lg mb-6">
-          <thead>
-            <tr>
-              <th className="py-3 px-5 text-left text-gray-600 font-semibold border-b border-gray-300">
-                Items
-              </th>
-              <th className="py-3 px-5 text-center text-gray-600 font-semibold border-b border-gray-300">
-                Stock Available
-              </th>
-              <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
-                Stock Recieve
-              </th>
-              <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
-                Stock Amount
-              </th>
-              <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
-                Payment Method
-              </th>
-              <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
-                Bank Name
-              </th>
-              <th className="py-3 px-8 text-left text-gray-600 font-semibold border-b border-gray-300">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-300 text-sm">
-            {appendedItems.map((row, index) => (
-              <tr key={index} className="hover:bg-gray-100 transition-colors">
-                <td className="py-3 pl-4 pr-2">
-                  <select
-                    className="border outline-none border-gray-300 rounded-md p-2 w-36"
-                    value={row.itemId}
-                    onChange={(e) =>
-                      handleRowChange(index, "itemId", e.target.value)
-                    }
-                    required
-                  >
-                    <option value="">Select Item</option>
-                    {items.map((item) => (
-                      <option key={item._id} value={item._id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-
-                <td className="py-3 px-2">
-                  <input
-                    type="number"
-                    value={row.stockAvailable}
-                    disabled
-                    className="border border-gray-300 rounded-md p-2 text-center w-[90px]"
-                  />
-                </td>
-                <td className="py-3 px-2">
-                  <input
-                    type="number"
-                    value={row.stockToRecieve}
-                    onChange={(e) =>
-                      handleRowChange(index, "stockToRecieve", e.target.value)
-                    }
-                    className="border border-gray-300 text-center rounded-md p-2 w-[90px]"
-                    required
-                  />
-                </td>
-                <td className="py-3 px-2">
-                  <input
-                    type="number"
-                    value={row.stockAmount}
-                    onChange={(e) =>
-                      handleRowChange(index, "stockAmount", e.target.value)
-                    }
-                    className="border border-gray-300 text-center rounded-md p-2 w-36"
-                    required
-                  />
-                </td>
-                <td className="py-3 px-2">
-                  <select
-                    className="border outline-none border-gray-300 rounded-md p-2 w-[135px] text-sm"
-                    value={row.paymentMethod}
-                    onChange={(e) =>
-                      handleRowChange(index, "paymentMethod", e.target.value)
-                    }
-                    required
-                  >
-                    <option value="">Select Method</option>
-                    <option value="cash">Cash</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="bank">Bank</option>
-                  </select>
-                </td>
-                <td className="py-3 px-2">
-                  <input
-                    type="text"
-                    value={row.bankName}
-                    onChange={(e) =>
-                      handleRowChange(index, "bankName", e.target.value)
-                    }
-                    className="border border-gray-300 text-center rounded-md p-2 w-36"
-                    disabled={row.paymentMethod !== "bank"}
-                    placeholder="Enter Bank Name"
-                  />
-                </td>
-                <td className="py-3 pr-4 pl-2 text-center">
-                  <button
-                    onClick={() => handleRemoveItem(index)}
-                    className="text-red-600 px-4 py-1 rounded hover:bg-red-100"
-                  >
-                    Remove
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border rounded-lg shadow-lg mb-6">
+            <thead>
+              <tr>
+                <th className="py-3 px-5 text-left text-gray-600 font-semibold border-b border-gray-300">
+                  Items
+                </th>
+                <th className="py-3 px-5 text-center text-gray-600 font-semibold border-b border-gray-300">
+                  Stock Available
+                </th>
+                <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
+                  Stock Receive
+                </th>
+                <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
+                  Stock Amount
+                </th>
+                <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
+                  Payment Method
+                </th>
+                <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
+                  Bank Name
+                </th>
+                <th className="py-3 px-8 text-left text-gray-600 font-semibold border-b border-gray-300">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
 
-        <div className="space-x-2">
-          <button
-            onClick={handleAddItem}
-            className="bg-blue-500 text-white px-2 py-1 rounded-md mb-4"
-          >
-            Add Item
-          </button>
-          <button
-            onClick={handleSaveItems}
-            className="bg-green-500 text-white px-4 py-1 rounded-md mb-4"
-          >
-            Save 
-          </button>
+            <tbody className="divide-y divide-gray-300 text-sm">
+              {appendedItems.map((row, index) => (
+                <tr key={index} className="hover:bg-gray-100 transition-colors">
+                  <td className="py-3 pl-4 pr-2">
+                    <select
+                      className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-36"
+                      value={row.itemId}
+                      onChange={(e) =>
+                        handleRowChange(index, "itemId", e.target.value)
+                      }
+                      required
+                    >
+                      <option value="">Select Item</option>
+                      {items.map((item) => (
+                        <option key={item._id} value={item._id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+
+                  <td className="py-3 px-2">
+                    <input
+                      type="number"
+                      value={row.stockAvailable}
+                      disabled
+                      className="border border-gray-300 rounded-md p-2 text-center w-[90px]"
+                    />
+                  </td>
+                  <td className="py-3 px-2">
+                    <input
+                      type="number"
+                      value={row.stockToRecieve}
+                      onChange={(e) =>
+                        handleRowChange(index, "stockToRecieve", e.target.value)
+                      }
+                      className="border border-gray-300 text-center rounded-md p-2 w-[90px]"
+                      required
+                    />
+                  </td>
+                  <td className="py-3 px-2">
+                    <input
+                      type="number"
+                      value={row.stockAmount}
+                      onChange={(e) =>
+                        handleRowChange(index, "stockAmount", e.target.value)
+                      }
+                      className="border border-gray-300 text-center rounded-md p-2 w-36"
+                      required
+                    />
+                  </td>
+                  <td className="py-3 px-2">
+                    <select
+                      className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-[135px] text-sm"
+                      value={row.paymentMethod}
+                      onChange={(e) =>
+                        handleRowChange(index, "paymentMethod", e.target.value)
+                      }
+                      required
+                    >
+                      <option value="">Select Method</option>
+                      <option value="cash">Cash</option>
+                      <option value="credit_card">Credit Card</option>
+                      <option value="bank">Bank</option>
+                    </select>
+                  </td>
+                  <td className="py-3 px-2">
+                    <input
+                      type="text"
+                      value={row.bankName}
+                      onChange={(e) =>
+                        handleRowChange(index, "bankName", e.target.value)
+                      }
+                      className="border border-gray-300 text-center rounded-md p-2 w-full md:w-36"
+                      disabled={row.paymentMethod !== "bank"}
+                      placeholder="Enter Bank Name"
+                    />
+                  </td>
+                  <td className="py-3 pr-4 pl-2 text-center">
+                    <button
+                      onClick={() => handleRemoveItem(index)}
+                      className=" text-red-500 rounded-md px-4 py-2"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="flex justify-between">
+            <button
+              onClick={handleAddItem}
+              className="bg-blue-500 text-white rounded-md px-4 py-2"
+            >
+              Add Item
+            </button>
+            <button
+              onClick={handleSaveItems}
+              className="bg-green-500 text-white rounded-md px-4 py-2"
+            >
+              Save
+            </button>
+          </div>
         </div>
       </div>
     </div>

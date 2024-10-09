@@ -33,8 +33,8 @@ const add = async (req, res) => {
       payemnt.bank_account = bank_account;
       payemnt.transaction_number = transaction_number;
     } else if (payment_method === "Cheque") {
-      payemnt.bank_account = bank_account; // Include bank_account for Cheque
-      payemnt.cheque_number = cheque_number; // Ensure cheque_number is included
+      payemnt.bank_account = bank_account; 
+      payemnt.cheque_number = cheque_number;
     } else if (payment_method === "Cash") {
       payemnt.cash_amount = cash_amount;
     }

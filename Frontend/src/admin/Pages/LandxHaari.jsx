@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaSearch,
+} from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,11 +14,16 @@ import "react-toastify/dist/ReactToastify.css";
 const LandxHaari = () => {
   const url = "http://localhost:3002";
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
   const [haari, setHaari] = useState([]);
   const [lands, setLands] = useState([]);
-  const [landxHaariList, setLandxHaariList] = useState([]);
-  const [newLand, setNewLand] = useState({
+  const [newData, setNewData] = useState([]);
+  const [editLandId, setEditLandId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
+  const [sortOrder, setSortOrder] = useState({ key: "", order: "asc" });
+   const [newLand, setNewLand] = useState({
     haariId: "",
     land: [
       {
@@ -23,151 +35,154 @@ const LandxHaari = () => {
       },
     ],
   });
- 
-
-  const [editLand, setEditLand] = useState(null);
-   const [searchQuery, setSearchQuery] = useState("");
-   const filteredHaari = landxHaariList.filter((haari) =>
-     haari.haariId.name?.toLowerCase().includes(searchQuery.toLowerCase())
-   );
-
-
-  useEffect(() => {
-    const fetchHaari = async () => {
-      try {
-        const response = await axios.get(`${url}/haari/gethaari`);
-        setHaari(response.data.data);
-      } catch (error) {
-        console.error("Error fetching haari:", error);
+  const filteredHaari = newData
+    .filter((data) =>
+      data.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortOrder.key) {
+        if (sortOrder.order === "asc") {
+          return a[sortOrder.key] > b[sortOrder.key] ? 1 : -1;
+        } else {
+          return a[sortOrder.key] < b[sortOrder.key] ? 1 : -1;
+        }
       }
-    };
+      return 0;
+    });
 
-    fetchHaari();
-  }, []);
-
-  useEffect(() => {
-    const fetchLand = async () => {
-      try {
-        const response = await axios.get(`${url}/land/list_land`);
-        setLands(response.data.data);
-      } catch (error) {
-        console.error("Error fetching lands:", error);
-      }
-    };
-
-    fetchLand();
-  }, []);
-
-  const fetchLandxHaari = async () => {
+  const fetchData = async () => {
+      setLoading(true);
     try {
-      const response = await axios.get(`${url}/landxhaari/get`);
-      setLandxHaariList(response.data.data);
+      const haariResponse = await axios.get(`${url}/haari/gethaari`);
+      setHaari(haariResponse.data.data);
+      const landResponse = await axios.get(`${url}/land/list_land`);
+      setLands(landResponse.data.data);
+      const landWithHaariResponse = await axios.get(`${url}/landxhaari/get`);
+      if (landWithHaariResponse.data && landWithHaariResponse.data.data) {
+        console.log(landWithHaariResponse.data.data);
+        setNewData(landWithHaariResponse.data.data);
+      }
     } catch (error) {
-      console.error("Error fetching LandxHaari:", error);
+      console.error("Error fetching data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    console.log("LandWithHaari State:", newData);
+  }, [newData]);
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        haariId: newLand.haariId,
+        landId: newLand.land.map((item) => ({
+          land_id: item.land_id,
+          crop_name: item.crop_name,
+          start_date: item.start_date,
+          end_date: item.end_date,
+          details: item.details,
+        })),
+      };
+      await axios.post(`${url}/landxhaari/add`, payload);
+      toast.success("Land Assigned Successfully!");
+      setShowAddForm(false);
+      fetchData();
+    } catch (error) {
+      console.error("Error adding item:", error);
     }
   };
 
-    const handleAdd = async (e) => {
-      e.preventDefault();
-      try {
-        const payload = {
-          haariId: newLand.haariId,
-          landId: newLand.land.map((item) => ({
-            land_id: item.land_id,
-            crop_name: item.crop_name,
-            start_date: item.start_date,
-            end_date: item.end_date,
-            details: item.details,
-          })),
-        };
-        await axios.post(`${url}/landxhaari/add`, payload);
-        toast.success("Land Assigned Successfully!");
-        setShowAddForm(false);
-        fetchLandxHaari();
-      } catch (error) {
-        console.error("Error adding item:", error);
-      }
-    };
+  const handleEdit = async (e, haariId, land) => {
+    e.preventDefault();
+    try {
+      const updatedLand = {
+        haariId: haariId,
+        landId: [
+          {
+            land_id: land._id,
+            crop_name: newLand.land[0].crop_name,
+            start_date: newLand.land[0].start_date,
+            end_date: newLand.land[0].end_date,
+            details: newLand.land[0].details,
+          },
+        ],
+      };
 
+      await axios.put(`${url}/landxhaari/update`, updatedLand);
+      setEditLandId(null);
+      fetchData();
+    } catch (error) {
+      console.error("Error editing item:", error);
+    }
+  };
 
-const handleEdit = async (e, haariId, land) => {
-  e.preventDefault();
-  try {
-    const updatedLand = {
-      haariId: haariId,
-      landId: [
+  const handleCancelEdit = () => {
+    setEditLandId(null);
+    setNewLand({
+      haariId: "",
+      land: [
         {
-          land_id: land._id,
-          crop_name: newLand.land[0].crop_name,
-          start_date: newLand.land[0].start_date,
-          end_date: newLand.land[0].end_date,
-          details: newLand.land[0].details,
+          land_id: "",
+          crop_name: "",
+          start_date: "",
+          end_date: "",
+          details: "",
         },
       ],
-    };
+    });
+  };
 
-    await axios.put(`${url}/landxhaari/update`, updatedLand);
-    setEditLand(null);
-    fetchLandxHaari();
-  } catch (error) {
-    console.error("Error editing item:", error);
-  }
-};
+  const handleDelete = async (haariId, landId) => {
+    try {
+      const response = await axios.post(`${url}/landxhaari/delete`, {
+        haariId,
+        Id: landId,
+      });
+      if (response.data.success) {
+        fetchData();
+        console.log("Delete successful:", response.data.message);
+      } else {
+        console.error("Delete failed:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  };
 
-const handleCancelEdit = () => {
-  setEditLand(null);
-  setNewLand({
-    haariId: "",
-    land: [
-      {
-        land_id: "",
-        crop_name: "",
-        start_date: "",
-        end_date: "",
-        details: "",
-      },
-    ],
-  });
-};
-
-
- const handleDelete = async (haariId, landId) => {
-   try {
-     const response = await axios.post(`${url}/landxhaari/delete`, {
-       haariId,
-       Id: landId,
-     });
-     if (response.data.success) {
-       fetchLandxHaari(); 
-       console.log("Delete successful:", response.data.message);
-     } else {
-       console.error("Delete failed:", response.data.message);
-     }
-   } catch (error) {
-     console.error("Error deleting item:", error);
-   }
- };
+   const totalPages = Math.ceil(newData.length / recordsPerPage);
+   const paginatedLand = newData.slice(
+     (currentPage - 1) * recordsPerPage,
+     currentPage * recordsPerPage
+   );
 
 
+  const handlePageChange = (page) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+  const handleSort = (key) => {
+    setSortOrder((prevSortOrder) => ({
+      key,
+      order: prevSortOrder.order === "asc" ? "desc" : "asc",
+    }));
+  };
 
-  useEffect(() => {
-    fetchLandxHaari();
-  }, []);
-  useEffect(() => {
-    console.log("Updated landxHaariList:", landxHaariList);
-  }, [landxHaariList]);
- 
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">
         Assigned Lands to Haaries
       </h1>
-      <div className="flex justify-between ">
+      <div className="flex justify-between flex-wrap gap-3">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Role"
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -242,7 +257,6 @@ const handleCancelEdit = () => {
                   </label>
                   <select
                     value={newLand.land[0].land_id}
-                    z
                     className="border w-full px-2 outline-none py-2 rounded-md text-black bg-white"
                     onChange={(e) => {
                       setNewLand({
@@ -400,240 +414,268 @@ const handleCancelEdit = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="py-3 px-2 text-left text-gray-600 font-semibold w-1/6">
-                Haari Name
-              </th>
-              <th className="py-3 px-2 text-left text-gray-600 font-semibold w-1/6">
-                Land Name
-              </th>
-              <th className="py-3 px-2 text-left text-gray-600 font-semibold w-1/6">
-                Crop Name
-              </th>
-              <th className="py-3 px-2 text-left text-gray-600 font-semibold w-1/6">
-                Start Date
-              </th>
-              <th className="py-3 px-2 text-left text-gray-600 font-semibold w-1/6">
-                End Date
-              </th>
-              <th className="py-3 px-2 text-left text-gray-600 font-semibold w-1/6">
-                Details
-              </th>
-              <th className="py-3 px-2 text-left text-gray-600 font-semibold w-1/6">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="text-sm">
-            {filteredHaari.map((haariItem) =>
-              haariItem.land.map((land, index) => (
-                <tr
-                  key={`${haariItem.haariId._id}-${land.land_id._id}`}
-                  className="border-b hover:bg-gray-100"
-                >
-                  <td className="py-3 px-2 w-1/6">
-                    {editLand === haariItem.haariId._id ? (
-                      <select
-                        name="haariName"
-                        value={newLand.haariId}
-                        onChange={(e) =>
-                          setNewLand({
-                            ...newLand,
-                            haariId: e.target.value,
-                          })
-                        }
-                        className="border px-2 py-1 rounded max-w-28"
-                      >
-                        {haari.map((haari) => (
-                          <option key={haari._id} value={haari._id}>
-                            {haari.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      haariItem.haariId.name
-                    )}
-                  </td>
-                  <td className="py-3 px-2 w-1/6">
-                    {editLand === haariItem.haariId._id ? (
-                      <select
-                        name="landName"
-                        value={newLand.land[0]?.land_id || ""}
-                        onChange={(e) =>
-                          setNewLand({
-                            ...newLand,
-                            land: [
-                              {
-                                ...newLand.land[0],
-                                land_id: e.target.value,
-                              },
-                            ],
-                          })
-                        }
-                        className="border px-2 py-1 rounded max-w-full"
-                      >
-                        {lands.map((landItem) => (
-                          <option key={landItem._id} value={landItem._id}>
-                            {landItem.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      land.land_id.name
-                    )}
-                  </td>
-                  <td className="py-3 px-2">
-                    {editLand === haariItem.haariId._id ? (
-                      <input
-                        type="text"
-                        name="cropName"
-                        value={newLand.land[0]?.crop_name || ""}
-                        onChange={(e) =>
-                          setNewLand({
-                            ...newLand,
-                            land: [
-                              {
-                                ...newLand.land[0],
-                                crop_name: e.target.value,
-                              },
-                            ],
-                          })
-                        }
-                        className="border px-2 py-1 rounded max-w-32"
-                      />
-                    ) : (
-                      land.crop_name
-                    )}
-                  </td>
-                  <td className="py-3 px-2">
-                    {editLand === haariItem.haariId._id ? (
-                      <input
-                        type="text"
-                        name="startDate"
-                        value={newLand.land[0]?.start_date || ""}
-                        onChange={(e) =>
-                          setNewLand({
-                            ...newLand,
-                            land: [
-                              {
-                                ...newLand.land[0],
-                                start_date: e.target.value,
-                              },
-                            ],
-                          })
-                        }
-                        className="border px-2 py-1 rounded max-w-28"
-                      />
-                    ) : (
-                      land.start_date
-                    )}
-                  </td>
-                  <td className="py-3 px-2">
-                    {editLand === haariItem.haariId._id ? (
-                      <input
-                        type="text"
-                        name="endDate"
-                        value={newLand.land[0]?.end_date || ""}
-                        onChange={(e) =>
-                          setNewLand({
-                            ...newLand,
-                            land: [
-                              {
-                                ...newLand.land[0],
-                                end_date: e.target.value,
-                              },
-                            ],
-                          })
-                        }
-                        className="border px-2 py-1 rounded max-w-28"
-                      />
-                    ) : (
-                      land.end_date
-                    )}
-                  </td>
-                  <td className="py-3 px-2">
-                    {editLand === haariItem.haariId._id ? (
-                      <input
-                        type="text"
-                        name="details"
-                        value={newLand.land[0]?.details || ""}
-                        onChange={(e) =>
-                          setNewLand({
-                            ...newLand,
-                            land: [
-                              {
-                                ...newLand.land[0],
-                                details: e.target.value,
-                              },
-                            ],
-                          })
-                        }
-                        className="border px-2 py-1 rounded max-w-40"
-                      />
-                    ) : (
-                      land.details
-                    )}
-                  </td>
-                  <td className="px-2 py-4 flex gap-2 items-center justify-center">
-                    {editLand === haariItem.haariId._id ? (
-                      <>
-                        <button
-                          onClick={(e) =>
-                            handleEdit(e, haariItem.haariId._id, land)
-                          }
-                          className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
-                        >
-                          <FaSave />
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
-                        >
-                          <FaTimes />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => {
-                            setEditLand(haariItem.haariId._id);
-                            // Populate the newLand state with the current land details for editing
-                            setNewLand({
-                              haariId: haariItem.haariId._id,
-                              land: [
-                                {
-                                  land_id: land.land_id._id,
-                                  crop_name: land.crop_name,
-                                  start_date: land.start_date,
-                                  end_date: land.end_date,
-                                  details: land.details,
-                                },
-                              ],
-                            });
-                          }}
-                          className=" text-green-600 py-1 px-2 rounded-md flex items-center gap-2"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleDelete(haariItem.haariId._id, land._id)
-                          }
-                          className=" text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
-                        >
-                          <FaTrash />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="mt-4 grid grid-cols-1 gap-4">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          <div className="grid grid-cols-7 bg-[#e0f2e9] text-xs md:text-base text-wrap">
+            {/* Header */}
+            <div className="py-3 text-center text-gray-800 font-semibold">
+              Haari Name
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
+              Land Name
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
+              Crop Name
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
+              Start Date
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
+              End Date
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
+              Details
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
+              Actions
+            </div>
+          </div>
+          {Array.isArray(paginatedLand) && paginatedLand.length > 0 ? (
+            paginatedLand.map((haariItem) =>
+              Array.isArray(haariItem.land) && haariItem.land.length > 0
+                ? haariItem.land.map((land) => (
+                    <div
+                      key={`${haariItem.haariId?._id}-${land._id}`}
+                      className="grid grid-cols-7 px-2 gap-2 border-b text-gray-700 md:text-sm text-[10px] hover:bg-gray-100"
+                    >
+                      <div className="py-3 text-center max-w-xs">
+                        {editLandId === land._id ? (
+                          <select
+                            name="haariName"
+                            value={newLand.haariId}
+                            onChange={(e) =>
+                              setNewLand({
+                                ...newLand,
+                                haariId: e.target.value,
+                              })
+                            }
+                            className="border rounded px-2 w-full"
+                          >
+                            {haari.map((haari) => (
+                              <option key={haari._id} value={haari._id}>
+                                {haari.name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          haariItem.haariId?.name || "N/A"
+                        )}
+                      </div>
+                      <div className="py-3 text-center max-w-xs">
+                        {editLandId === land._id ? (
+                          <select
+                            name="landName"
+                            value={newLand.land[0]?.land_id || ""}
+                            onChange={(e) =>
+                              setNewLand({
+                                ...newLand,
+                                land: [
+                                  {
+                                    ...newLand.land[0],
+                                    land_id: e.target.value,
+                                  },
+                                ],
+                              })
+                            }
+                            className="border rounded px-2 w-full"
+                          >
+                            {lands.map((landItem) => (
+                              <option key={landItem._id} value={landItem._id}>
+                                {landItem.name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          land.land_id?.name || "N/A"
+                        )}
+                      </div>
+                      <div className="py-3 text-center max-w-xs">
+                        {editLandId === land._id ? (
+                          <input
+                            type="text"
+                            name="cropName"
+                            value={newLand.land[0]?.crop_name || ""}
+                            onChange={(e) =>
+                              setNewLand({
+                                ...newLand,
+                                land: [
+                                  {
+                                    ...newLand.land[0],
+                                    crop_name: e.target.value,
+                                  },
+                                ],
+                              })
+                            }
+                            className="border rounded px-2 w-full"
+                          />
+                        ) : (
+                          land.crop_name || "N/A"
+                        )}
+                      </div>
+                      <div className="py-3 text-center max-w-xs">
+                        {editLandId === land._id ? (
+                          <input
+                            type="text"
+                            name="startDate"
+                            value={newLand.land[0]?.start_date || ""}
+                            onChange={(e) =>
+                              setNewLand({
+                                ...newLand,
+                                land: [
+                                  {
+                                    ...newLand.land[0],
+                                    start_date: e.target.value,
+                                  },
+                                ],
+                              })
+                            }
+                            className="border rounded px-2 w-full"
+                          />
+                        ) : (
+                          land.start_date || "N/A"
+                        )}
+                      </div>
+                      <div className="py-3 text-center max-w-xs">
+                        {editLandId === land._id ? (
+                          <input
+                            type="text"
+                            name="endDate"
+                            value={newLand.land[0]?.end_date || ""}
+                            onChange={(e) =>
+                              setNewLand({
+                                ...newLand,
+                                land: [
+                                  {
+                                    ...newLand.land[0],
+                                    end_date: e.target.value,
+                                  },
+                                ],
+                              })
+                            }
+                            className="border rounded px-2 w-full"
+                          />
+                        ) : (
+                          land.end_date || "N/A"
+                        )}
+                      </div>
+                      <div className="py-3 text-center max-w-xs">
+                        {editLandId === land._id ? (
+                          <input
+                            type="text"
+                            name="details"
+                            value={newLand.land[0]?.details || ""}
+                            onChange={(e) =>
+                              setNewLand({
+                                ...newLand,
+                                land: [
+                                  {
+                                    ...newLand.land[0],
+                                    details: e.target.value,
+                                  },
+                                ],
+                              })
+                            }
+                            className="border rounded px-2 w-full"
+                          />
+                        ) : (
+                          land.details || "N/A"
+                        )}
+                      </div>
+                      <div className="py-3 text-center  flex justify-center">
+                        {editLandId === land._id ? (
+                          <>
+                            <button
+                              className="text-green-500 py-1 px-1 md:px-2 rounded-md flex items-center gap-2"
+                              onClick={(e) =>
+                                handleEdit(e, haariItem.haariId._id, land)
+                              }
+                            >
+                              <FaSave className="text-sm" />
+                            </button>
+                            <button
+                              className="text-gray-700 py-1 md:px-2 rounded-md flex items-center gap-2"
+                              onClick={handleCancelEdit}
+                            >
+                              <FaTimes className="text-sm" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="text-green-600 py-1 px-1 md:px-2 rounded-md flex items-center gap-2 "
+                              onClick={() => {
+                                setEditLandId(land._id);
+                                setNewLand({
+                                  haariId: haariItem.haariId._id,
+                                  land: [
+                                    {
+                                      land_id: land.land_id._id,
+                                      crop_name: land.crop_name,
+                                      start_date: land.start_date,
+                                      end_date: land.end_date,
+                                      details: land.details,
+                                    },
+                                  ],
+                                });
+                              }}
+                            >
+                              <FaEdit className="text-sm" />
+                            </button>
+                            <button
+                              className="text-red-600 py-1 md:px-2 rounded-md flex items-center"
+                              onClick={() =>
+                                handleDelete(haariItem.haariId._id, land._id)
+                              }
+                            >
+                              <FaTrash className="text-sm" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                : null
+            )
+          ) : (
+            <p className="text-center">Loading...</p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-2  mx-2 border rounded-lg ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &laquo;
+        </button>
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-2 mx-2 border rounded-lg ${
+            currentPage === totalPages
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &raquo;
+        </button>
       </div>
     </div>
   );

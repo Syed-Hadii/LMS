@@ -26,10 +26,9 @@ const User = () => {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editableData, setEditableData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
- const filteredUsers = listUser.filter((user) =>
-   user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
- );
-
+  const filteredUsers = listUser.filter((user) =>
+    user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -47,7 +46,7 @@ const User = () => {
   const fetchUserList = async () => {
     try {
       const response = await axios.get(`${url}/adduser/listuser`);
-      setListUser(response.data.data); // Updated this line
+      setListUser(response.data.data);
       console.log(response.data.data); // Log the users list
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -117,6 +116,7 @@ const User = () => {
       console.error("Error adding user:", error);
     }
   };
+
   const handleCancelEdit = () => {
     setEditingUserId(null);
     setEditableData({});
@@ -135,23 +135,22 @@ const User = () => {
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Users List</h1>
-      <div className="flex justify-between ">
+      <div className="flex flex-col md:flex-row justify-between mb-5">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
-            className="outline-none w-72 rounded-md px-2 py-1.5"
+            className="outline-none w-full md:w-72 rounded-md px-2 py-1.5"
             placeholder="Search Accounts"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
           </button>
         </div>
         <div>
           <button
-            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mt-3 md:mt-0"
             onClick={() => setShowAddForm(true)}
           >
             <FaPlus className="text-sm" />
@@ -162,7 +161,7 @@ const User = () => {
 
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-5 text-center rounded shadow-lg w-[420px] h-[500px] mt-">
+          <div className="bg-white p-5 text-center rounded shadow-lg w-[420px] h-[500px]">
             <h1 className="text-lg font-semibold mb-5">Add User</h1>
             <hr className="mb-6 border-gray-400" />
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -274,7 +273,7 @@ const User = () => {
               <td className="py-3 px-4">
                 {editingUserId === user._id ? (
                   <input
-                    type="email"
+                    type="text"
                     name="email"
                     value={editableData.email}
                     onChange={handleEditChange}
@@ -290,7 +289,7 @@ const User = () => {
                     name="role"
                     value={editableData.role}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-44"
+                    className="border rounded px-2 w-40"
                   >
                     {roles.map((role) => (
                       <option key={role._id} value={role._id}>
@@ -299,40 +298,40 @@ const User = () => {
                     ))}
                   </select>
                 ) : (
-                  roles.find((role) => role._id === user.role)?.role
+                  user.role?.role
                 )}
               </td>
-              <td className="py-3 px-4 flex">
+              <td className="py-3 px-4">
                 {editingUserId === user._id ? (
-                  <>
+                  <div className="flex gap-2">
                     <button
-                      className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      className="text-green-500 hover:text-green-700"
                       onClick={handleSaveClick}
                     >
-                      <FaSave className="text-sm" />
+                      <FaSave />
                     </button>
                     <button
-                      className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                      className="text-red-500 hover:text-red-700"
                       onClick={handleCancelEdit}
                     >
-                      <FaTimes className="text-sm" />
+                      <FaTimes />
                     </button>
-                  </>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex gap-2">
                     <button
-                      className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      className="text-blue-500 hover:text-blue-700"
                       onClick={() => handleEditClick(user)}
                     >
-                      <FaEdit className="text-sm" />
+                      <FaEdit />
                     </button>
                     <button
-                      className="text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
+                      className="text-red-500 hover:text-red-700"
                       onClick={() => handleRemove(user._id)}
                     >
-                      <FaTrash className="text-sm" />
+                      <FaTrash />
                     </button>
-                  </>
+                  </div>
                 )}
               </td>
             </tr>

@@ -15,6 +15,7 @@ import stockrecieveRouter from "./routes/stockRecieveRoute.js";
 import chartAccountRouter from "./routes/chartAccountsRoute.js";
 import paymentRecieptRouter from "./routes/paymentVoucherRoute.js";
 import recieveRecieptRouter from "./routes/recieveVoucherRoute.js";
+import journalVoucherRouter from "./routes/journalVoucherRoute.js";
 
 const app = express();
 const port = 3002;
@@ -38,6 +39,7 @@ app.use("/stockrecieve", stockrecieveRouter)
 app.use("/chartaccount", chartAccountRouter)
 app.use("/paymentreciept", paymentRecieptRouter);
 app.use("/recievereciept", recieveRecieptRouter);
+app.use("/journalvoucher", journalVoucherRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

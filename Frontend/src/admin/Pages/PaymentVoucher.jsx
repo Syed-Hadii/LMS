@@ -7,7 +7,6 @@ const PaymentForm = () => {
   const url = "http://localhost:3002";
   const [accountList, setAccountList] = useState([]);
   const [subAccounts, setSubAccounts] = useState([]);
-  // const [postedDateChecked, setPostedDateChecked] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [bankAccount, setBankAccount] = useState("");
   const [transactionNumber, setTransactionNumber] = useState("");
@@ -28,6 +27,7 @@ const PaymentForm = () => {
     transaction_number: "",
     cheque_number: "",
   });
+
   const resetForm = () => {
     setFormData({
       voucher_no: "",
@@ -68,49 +68,48 @@ const PaymentForm = () => {
     fetchBank();
   }, []);
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
-   setLoading(true); // Set loading state
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true); // Set loading state
 
-   const submissionData = {
-     voucher_no: formData.voucher_no,
-     posted_date: formData.posted_date,
-     date: formData.date,
-     reference: formData.reference,
-     account: formData.account,
-     sub_account: formData.sub_account,
-     payment_method: paymentMethod,
-     paid_amount: formData.paid_amount,
-     desc: formData.desc,
-    //  ...(postedDateChecked && { posted_date: formData.posted_date }),
-     ...(paymentMethod === "Bank Transfer" && {
-       bank_account: bankAccount,
-       transaction_number: transactionNumber,
-     }),
-     ...(paymentMethod === "Cheque" && {
-       bank_account: bankAccount,
-       cheque_number: chequeNumber,
-     }),
-   };
+    const submissionData = {
+      voucher_no: formData.voucher_no,
+      posted_date: formData.posted_date,
+      date: formData.date,
+      reference: formData.reference,
+      account: formData.account,
+      sub_account: formData.sub_account,
+      payment_method: paymentMethod,
+      paid_amount: formData.paid_amount,
+      desc: formData.desc,
+      ...(paymentMethod === "Bank Transfer" && {
+        bank_account: bankAccount,
+        transaction_number: transactionNumber,
+      }),
+      ...(paymentMethod === "Cheque" && {
+        bank_account: bankAccount,
+        cheque_number: chequeNumber,
+      }),
+    };
 
-   try {
-     const response = await axios.post(
-       `${url}/paymentreciept/add`,
-       submissionData
-     );
-     if (response.data.success) {
-       toast.success("Payment Voucher Created Successfully!");
-       resetForm();
-     } else {
-       toast.error("Error creating payment voucher");
-     }
-   } catch (error) {
-     console.error(error);
-     toast.error("Try Again");
-   } finally {
-     setLoading(false); // Reset loading state
-   }
- };
+    try {
+      const response = await axios.post(
+        `${url}/paymentreciept/add`,
+        submissionData
+      );
+      if (response.data.success) {
+        toast.success("Payment Voucher Created Successfully!");
+        resetForm();
+      } else {
+        toast.error("Error creating payment voucher");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Try Again");
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -121,62 +120,62 @@ const PaymentForm = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 mx-auto">
       <h1 className="text-xl mb-5 font-semibold text-left">Payment Voucher</h1>
       <hr className="border-gray-300 border-1.5 p-4" />
       <form className="space-y-4 text-gray-700" onSubmit={handleSubmit}>
         {/* Voucher No */}
-        <div className="flex items-center">
-          <label className="w-40 font-medium">Voucher No</label>
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Voucher No</label>
           <input
             type="text"
             name="voucher_no"
             value={formData.voucher_no}
             onChange={handleInputChange}
             required
-            className="w-full px-4 py-2 border rounded outline-none"
+            className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
           />
         </div>
 
         {/* Posted Date */}
-        <div className="flex items-center">
-          <label className="w-40 font-medium">Posted Date</label>
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Posted Date</label>
           <input
             type="text"
             value={formData.posted_date}
-            className="w-full px-4 py-2 border rounded outline-none bg-gray-100"
+            className="w-full md:flex-1 px-4 py-2 border rounded outline-none bg-gray-100"
             readOnly
           />
         </div>
 
         {/* Date */}
-        <div className="flex items-center">
-          <label className="w-40 font-medium">Date</label>
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Date</label>
           <input
             type="date"
             name="date"
             value={formData.date}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded outline-none"
+            className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
             placeholder="Enter Date"
             required
           />
         </div>
 
         {/* Reference */}
-        <div className="flex items-center">
-          <label className="w-40 font-medium">Reference</label>
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Reference</label>
           <input
             type="text"
             name="reference"
             value={formData.reference}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded outline-none"
+            className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
           />
         </div>
 
-        <div className="flex items-center">
-          <label className="w-40 font-medium">Chart of Account</label>
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Chart of Account</label>
           <select
             name="account"
             value={formData.account}
@@ -193,7 +192,7 @@ const PaymentForm = () => {
                 setSubAccounts([]); // Clear subAccounts when no account is selected
               }
             }}
-            className="w-full px-4 py-2 border rounded outline-none"
+            className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
             required
           >
             <option value="">Select Account</option>
@@ -207,13 +206,13 @@ const PaymentForm = () => {
 
         {/* Conditionally render Sub-Account Dropdown if an account is selected */}
         {formData.account && subAccounts.length > 0 && (
-          <div className="flex items-center">
-            <label className="w-40 font-medium">Sub-Account</label>
+          <div className="flex flex-col md:flex-row items-center">
+            <label className="w-full md:w-40 font-medium">Sub-Account</label>
             <select
               name="sub_account"
               value={formData.sub_account}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded outline-none"
+              className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
             >
               <option value="">Select Sub Account</option>
               {subAccounts.map((subAccount) => (
@@ -226,8 +225,8 @@ const PaymentForm = () => {
         )}
 
         {/* Payment Method Dropdown */}
-        <div className="flex items-center">
-          <label className="w-40 font-medium">Payment Method</label>
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Payment Method</label>
           <select
             name="payment_method"
             value={paymentMethod}
@@ -235,7 +234,7 @@ const PaymentForm = () => {
               setPaymentMethod(e.target.value);
               handleInputChange(e);
             }}
-            className="w-full px-4 py-2 border rounded"
+            className="w-full md:flex-1 px-4 py-2 border rounded"
             required
           >
             <option value="Cash">Cash</option>
@@ -247,8 +246,8 @@ const PaymentForm = () => {
         {/* Conditionally Rendered Fields */}
         {paymentMethod === "Bank Transfer" && (
           <>
-            <div className="flex items-center">
-              <label className="w-40 font-medium">Bank Account</label>
+            <div className="flex flex-col md:flex-row items-center">
+              <label className="w-full md:w-40 font-medium">Bank Account</label>
               <select
                 name="bank_account"
                 value={bankAccount}
@@ -256,7 +255,7 @@ const PaymentForm = () => {
                   setBankAccount(e.target.value);
                   handleInputChange(e);
                 }}
-                className="w-full px-4 py-2 border rounded outline-none"
+                className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
                 required
               >
                 <option value="">Select Bank Account</option>
@@ -268,8 +267,10 @@ const PaymentForm = () => {
               </select>
             </div>
 
-            <div className="flex items-center">
-              <label className="w-40 font-medium">Transaction Number</label>
+            <div className="flex flex-col md:flex-row items-center">
+              <label className="w-full md:w-40 font-medium">
+                Transaction Number
+              </label>
               <input
                 type="text"
                 name="transaction_number"
@@ -278,8 +279,8 @@ const PaymentForm = () => {
                   setTransactionNumber(e.target.value);
                   handleInputChange(e);
                 }}
-                className="w-full px-4 py-2 border rounded outline-none"
-                placeholder="Enter Transaction Number"
+                className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
+                placeholder="Transaction Number"
                 required
               />
             </div>
@@ -288,24 +289,8 @@ const PaymentForm = () => {
 
         {paymentMethod === "Cheque" && (
           <>
-            <div className="flex items-center">
-              <label className="w-40 font-medium">Cheque Number</label>
-              <input
-                type="text"
-                name="cheque_number"
-                value={chequeNumber}
-                onChange={(e) => {
-                  setChequeNumber(e.target.value);
-                  handleInputChange(e);
-                }}
-                className="w-full px-4 py-2 border rounded outline-none"
-                placeholder="Enter Cheque Number"
-                required
-              />
-            </div>
-
-            <div className="flex items-center">
-              <label className="w-40 font-medium">Bank Account</label>
+            <div className="flex flex-col md:flex-row items-center">
+              <label className="w-full md:w-40 font-medium">Bank Account</label>
               <select
                 name="bank_account"
                 value={bankAccount}
@@ -313,7 +298,7 @@ const PaymentForm = () => {
                   setBankAccount(e.target.value);
                   handleInputChange(e);
                 }}
-                className="w-full px-4 py-2 border rounded outline-none"
+                className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
                 required
               >
                 <option value="">Select Bank Account</option>
@@ -324,52 +309,57 @@ const PaymentForm = () => {
                 ))}
               </select>
             </div>
+
+            <div className="flex flex-col md:flex-row items-center">
+              <label className="w-full md:w-40 font-medium">
+                Cheque Number
+              </label>
+              <input
+                type="text"
+                name="cheque_number"
+                value={chequeNumber}
+                onChange={(e) => {
+                  setChequeNumber(e.target.value);
+                  handleInputChange(e);
+                }}
+                className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
+                placeholder="Cheque Number"
+                required
+              />
+            </div>
           </>
         )}
 
-        {/* Paid Amount */}
-        <div className="flex items-center">
-          <label className="w-40 font-medium">Paid Amount</label>
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Paid Amount</label>
           <input
             type="number"
             name="paid_amount"
             value={formData.paid_amount}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded outline-none"
+            className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
             required
           />
         </div>
 
-        {/* desc */}
-        <div className="flex items-center">
-          <label className="w-40 font-medium">desc</label>
-          <input
-            type="text"
+        <div className="flex flex-col md:flex-row items-center">
+          <label className="w-full md:w-40 font-medium">Description</label>
+          <textarea
             name="desc"
             value={formData.desc}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded outline-none"
-            placeholder="Enter desc"
+            className="w-full md:flex-1 px-4 py-2 border rounded outline-none"
           />
         </div>
 
-        {/* Posted Date Checkbox */}
-        {/* <div className="flex items-center">
-          <label className="w-40 font-medium">Posted Date</label>
-          <input
-            type="checkbox"
-            checked={postedDateChecked}
-            onChange={() => setPostedDateChecked(!postedDateChecked)}
-            className="w-4 h-4"
-          />
-        </div> */}
-
-        {/* Submit Button */}
         <button
           type="submit"
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+          className={`bg-green-500 hover:bg-green-600 text-white mt-4 w-full px-4 py-2 rounded ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={loading}
         >
-          Submit
+          {loading ? "Creating..." : "Create Payment Voucher"}
         </button>
       </form>
     </div>

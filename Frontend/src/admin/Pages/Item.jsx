@@ -20,9 +20,25 @@ const Item = () => {
   const [editingItemId, setEditingItemId] = useState(null);
   const [editableData, setEditableData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredItems = itemList.filter((item) =>
-    item.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 6;
+  const [sortConfig, setSortConfig] = useState({
+    key: "name",
+    direction: "asc",
+  });
+  const filteredItems = itemList
+    .filter((supplier) =>
+      supplier.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
 
 useEffect(() => {
   const fetchStores = async () => {
@@ -103,6 +119,24 @@ useEffect(() => {
     const { name, value } = e.target;
     setNewItems({ ...newItems, [name]: value });
   };
+   const handleSort = (key) => {
+     let direction = "asc";
+     if (sortConfig.key === key && sortConfig.direction === "asc") {
+       direction = "desc";
+     }
+     setSortConfig({ key, direction });
+   };
+    const totalPages = Math.ceil(filteredItems.length / recordsPerPage);
+    const paginatedBank = filteredItems.slice(
+      (currentPage - 1) * recordsPerPage,
+      currentPage * recordsPerPage
+    );
+
+    const handlePageChange = (page) => {
+      if (page > 0 && page <= totalPages) {
+        setCurrentPage(page);
+      }
+    };
   useEffect(() => {
     fetchItems();
   }, []);
@@ -110,7 +144,7 @@ useEffect(() => {
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Users List</h1>
-      <div className="flex justify-between ">
+      <div className="flex justify-between flex-wrap gap-3">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
@@ -282,45 +316,75 @@ useEffect(() => {
         </div>
       )}
 
-      <table className="min-w-full max-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Name
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Unit
-            </th>
-
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Package Quantity
-            </th>
-
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredItems.map((item) => (
-            <tr
-              key={item._id}
-              className="border-b text-gray-700 text-sm hover:bg-gray-100"
+      <div className="mt-4 grid grid-cols-1 gap-4">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          {/* Header Row */}
+          <div className="grid grid-cols-4 bg-[#e0f2e9] text-center text-sm md:text-base">
+            <div
+              className="py-3 text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("name")}
             >
-              <td className="py-3 px-4">
+              Name{" "}
+              {sortConfig.key === "name" ? (
+                <span className="inline-block ml-2 -mt-1 align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div
+              className="py-3 text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("unit")}
+            >
+              Unit{" "}
+              {sortConfig.key === "unit" ? (
+                <span className="inline-block align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div
+              className="py-3 text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("pkg_qty")}
+            >
+              Package Quantity{" "}
+              {sortConfig.key === "pkg_qty" ? (
+                <span className="inline-block align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div className="py-3 text-gray-800 font-semibold">Actions</div>
+          </div>
+
+          {/* Data Rows */}
+          {paginatedBank.map((item) => (
+            <div
+              key={item._id}
+              className="grid grid-cols-4 gap-2 border-b text-gray-700 text-xs md:text-sm hover:bg-gray-100"
+            >
+              {/* Name Column */}
+              <div className="py-3 text-center">
                 {editingItemId === item._id ? (
                   <input
                     type="text"
                     name="name"
                     value={editableData.name}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-40"
+                    className="border rounded px-2 w-full"
                   />
                 ) : (
                   item.name
                 )}
-              </td>
-              <td className="py-3 px-4">
+              </div>
+
+              {/* Unit Column */}
+              <div className="py-3 text-center">
                 {editingItemId === item._id ? (
                   <input
                     type="text"
@@ -332,9 +396,10 @@ useEffect(() => {
                 ) : (
                   item.unit
                 )}
-              </td>
+              </div>
 
-              <td className="py-3 px-4">
+              {/* Package Quantity Column */}
+              <div className="py-3 text-center">
                 {editingItemId === item._id ? (
                   <input
                     type="number"
@@ -346,36 +411,123 @@ useEffect(() => {
                 ) : (
                   item.pkg_qty
                 )}
-              </td>
+              </div>
 
-              <td className="py-3 px-4">
+              {/* Actions Column */}
+              <div className="py-3 text-center flex justify-center">
                 {editingItemId === item._id ? (
                   <>
-                    <button onClick={handleSaveClick} className="mr-2">
-                      <FaSave className="text-blue-600" />
+                    <button
+                      className="text-green-500 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      onClick={handleSaveClick}
+                    >
+                      <FaSave className="text-sm" />
                     </button>
-                    <button onClick={handleCancelEdit}>
-                      <FaTimes className="text-red-600" />
+                    <button
+                      className="text-gray-700 py-1 px-2 rounded-md flex items-center gap-2"
+                      onClick={handleCancelEdit}
+                    >
+                      <FaTimes className="text-sm" />
                     </button>
                   </>
                 ) : (
                   <>
                     <button
+                      className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={() => handleEditClick(item)}
-                      className="mr-2"
                     >
-                      <FaEdit className="text-green-600" />
+                      <FaEdit className="text-sm" />
                     </button>
-                    <button onClick={() => handleDelete(item._id)}>
-                      <FaTrash className="text-red-600" />
+                    <button
+                      className="text-red-600 py-1 px-2 rounded-md flex items-center"
+                      onClick={() => handleDelete(item._id)}
+                    >
+                      <FaTrash className="text-sm" />
                     </button>
                   </>
                 )}
-              </td>
-            </tr>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-2 mx-1 border rounded ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          &laquo;
+        </button>
+        <button
+          onClick={() => handlePageChange(1)}
+          className={`px-2 mx-1 border rounded ${
+            currentPage === 1
+              ? "bg-green-500 text-white"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          1
+        </button>
+        {currentPage > 3 && <span className="mx-1 text-gray-700">...</span>}
+
+        {Array.from({ length: Math.min(2, totalPages - 2) }, (_, i) => {
+          const page =
+            currentPage <= totalPages - 3
+              ? currentPage + i
+              : totalPages - 5 + i;
+
+          if (page > 1 && page < totalPages) {
+            return (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-2 mx-1 border rounded ${
+                  currentPage === page
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {page}
+              </button>
+            );
+          }
+          return null;
+        })}
+        {currentPage < totalPages - 2 && (
+          <span className="mx-1 text-gray-700">...</span>
+        )}
+
+        {totalPages > 1 && (
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            className={`px-2 mx-1 border rounded ${
+              currentPage === totalPages
+                ? "bg-green-500 text-white"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {totalPages}
+          </button>
+        )}
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-2 mx-1 border rounded ${
+            currentPage === totalPages
+              ? "bg-gray-300 text-gray-500"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          &raquo;
+        </button>
+      </div>
     </div>
   );
 };

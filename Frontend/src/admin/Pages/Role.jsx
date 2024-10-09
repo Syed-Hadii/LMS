@@ -12,9 +12,32 @@ const Role = () => {
   const [editingRoleId, setEditingRoleId] = useState(null);
   const [editableRole, setEditableRole] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredRole = roles.filter((role) =>
-    role.role?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+   const [currentPage, setCurrentPage] = useState(1);
+   const recordsPerPage = 6;
+   const [sortConfig, setSortConfig] = useState({
+     key: "name",
+     direction: "asc",
+   });
+   const filteredRole = roles
+     .filter((role) =>
+       role.role?.toLowerCase().includes(searchQuery.toLowerCase())
+     )
+     .sort((a, b) => {
+       if (a[sortConfig.key] < b[sortConfig.key]) {
+         return sortConfig.direction === "asc" ? -1 : 1;
+       }
+       if (a[sortConfig.key] > b[sortConfig.key]) {
+         return sortConfig.direction === "asc" ? 1 : -1;
+       }
+       return 0;
+     });
+   const handleSort = (key) => {
+     let direction = "asc";
+     if (sortConfig.key === key && sortConfig.direction === "asc") {
+       direction = "desc";
+     }
+     setSortConfig({ key, direction });
+   };
 
 
   const fetchRoles = async () => {
@@ -84,6 +107,18 @@ const Role = () => {
       console.error("Error updating role:", error);
     }
   };
+  
+    const totalPages = Math.ceil(filteredRole.length / recordsPerPage);
+    const paginatedRole = filteredRole.slice(
+      (currentPage - 1) * recordsPerPage,
+      currentPage * recordsPerPage
+    );
+
+    const handlePageChange = (page) => {
+      if (page > 0 && page <= totalPages) {
+        setCurrentPage(page);
+      }
+    };
 
   const handleCancelEdit = () => {
     setEditingRoleId(null);
@@ -93,7 +128,7 @@ const Role = () => {
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Role List</h1>
-      <div className="flex justify-between ">
+      <div className="flex justify-between flex-wrap gap-3">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
@@ -151,37 +186,50 @@ const Role = () => {
         </div>
       )}
 
-      <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Role
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
+      <div className="mt-4 grid grid-cols-1 gap-4">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          <div className="grid grid-cols-3 bg-[#e0f2e9]">
+            <div
+              className="py-3 text-center text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("role")}
+            >
+              Role{" "}
+              {sortConfig.key === "role" ? (
+                <span className="inline-block ml-2 -mt-1 align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
               Permission
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
               Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredRole.map((role) => (
-            <tr key={role._id} className="border-b hover:bg-gray-100">
-              <td className="py-3 px-4">
+            </div>
+          </div>
+          {paginatedRole.map((role) => (
+            <div
+              key={role._id}
+              className="grid grid-cols-3 gap-2 border-b text-gray-700 text-sm hover:bg-gray-100"
+            >
+              <div className="py-3 text-center max-w-xs">
                 {editingRoleId === role._id ? (
                   <input
                     type="text"
                     value={editableRole}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-40"
+                    className="border rounded px-2 w-full"
                   />
                 ) : (
                   role.role
                 )}
-              </td>
-              <td className="py-3 px-4">Permission Details</td>
-              <td className="py-3 px-4 flex">
+              </div>
+              <div className="py-3 text-center max-w-xs">
+                Permission Details
+              </div>
+              <div className="py-3 text-center  flex justify-center">
                 {editingRoleId === role._id ? (
                   <>
                     <button
@@ -213,11 +261,37 @@ const Role = () => {
                     </button>
                   </>
                 )}
-              </td>
-            </tr>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-2  mx-2 border rounded-lg ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &laquo;
+        </button>
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-2 mx-2 border rounded-lg ${
+            currentPage === totalPages
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &raquo;
+        </button>
+      </div>
     </div>
   );
 };

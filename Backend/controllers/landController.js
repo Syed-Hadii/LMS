@@ -10,11 +10,13 @@ const view_land = async (req, res) => {
   }
 };
 const save_land = async (req, res) => {
-  const { name, area } = req.body;
+  const { name, area, size, location } = req.body;
   try {
     const AddLand = new Land({
       name,
       area,
+      size,
+      location,
     });
     const $land = await AddLand.save();
     res.json({ success: true, message: "Land Inseted" });
@@ -24,11 +26,13 @@ const save_land = async (req, res) => {
   }
 };
 const update_haari = async (req, res) => {
-  const { id, name, area } = req.body;
+  const { id, name, area,size, location } = req.body;
   try {
     const updatedData = {
       name,
       area,
+      size,
+      location,
     };
     const land = await Land.findByIdAndUpdate(id, updatedData, { new: true });
     return res.json({

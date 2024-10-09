@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import profile from "../assets/profile.avif";
-import { FaShoppingCart, FaBell, FaCog, FaSun } from "react-icons/fa";
+import { FaShoppingCart, FaBell, FaCog } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 
 const Navbar = () => {
@@ -47,7 +47,7 @@ const Navbar = () => {
   return (
     <div
       className={`navbar px-3 py-4 sticky top-0 transition-shadow duration-300 bg-white text-[#067528] ${
-        hasShadow ? "shadow-lg" : ""
+        hasShadow ? "shadow-[0_2px_4px_rgba(0,0,0,0.1)]" : ""
       }`}
     >
       <div className="container flex justify-between items-center">
@@ -101,7 +101,7 @@ const Navbar = () => {
                 onMouseLeave={handleDelayedHide}
               >
                 <p className="px-4 py-2 text-sm text-[#067528] border-b">
-                  {userName} 
+                  {userName}
                 </p>
                 <div className="flex flex-col items-start md:hidden">
                   <NavLink className="nav-link w-full px-4 py-2 text-left text-sm text-[#067528] hover:bg-[#067528] hover:text-white">

@@ -8,14 +8,14 @@ const ChartsofAccounts = () => {
   const url = "http://localhost:3002";
   const [showAddForm, setShowAddForm] = useState(false);
   const [accountList, setAccountList] = useState([]);
-  const [expandedAccounts, setExpandedAccounts] = useState({}); // Track expanded state for each main account
+  const [expandedAccounts, setExpandedAccounts] = useState({});
   const [newAccount, setNewAccount] = useState({
     parent_id: "",
     account_name: "",
     initial_amount: "",
     account_nature: "",
   });
-  const [searchTerm, setSearchTerm] = useState(""); // State for search input
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchChartAccount = async () => {
     try {
@@ -32,24 +32,22 @@ const ChartsofAccounts = () => {
       let newChartAccount;
 
       if (newAccount.parent_id) {
-        // Adding a sub-account
         newChartAccount = {
           name: accountList.find(
             (account) => account._id === newAccount.parent_id
-          )?.name, // Set main account name
+          )?.name,
           subCat: [
             {
               parent_id: newAccount.parent_id,
-              name: newAccount.account_name, // Sub-account name
+              name: newAccount.account_name,
               amount: parseFloat(newAccount.initial_amount),
               account_nature: newAccount.account_nature,
             },
           ],
         };
       } else {
-        // Adding a main account
         newChartAccount = {
-          name: newAccount.account_name, // Main account name
+          name: newAccount.account_name,
           subCat: [],
         };
       }
@@ -89,7 +87,6 @@ const ChartsofAccounts = () => {
     setNewAccount({ ...newAccount, [name]: value });
   };
 
-  // Filter the account list based on the search term
   const filteredAccounts = accountList.filter((account) =>
     account.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -99,24 +96,24 @@ const ChartsofAccounts = () => {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Accounts List</h1>
-      <div className="flex justify-between">
-        <div className="border border-gray-400 rounded-md h-10 flex">
+      <div className="flex flex-col md:flex-row justify-between mb-5">
+        <div className="border border-gray-400 rounded-md flex h-10">
           <input
             type="text"
-            className="outline-none w-72 rounded-md px-2 py-1.5"
+            className="outline-none w-full rounded-md px-2 py-1.5"
             placeholder="Search Accounts"
-            value={searchTerm} // Bind input value to searchTerm state
-            onChange={(e) => setSearchTerm(e.target.value)} // Update search term on input change
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
           </button>
         </div>
-        <div>
+        <div className="mt-4 md:mt-0">
           <button
-            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
+            className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2"
             onClick={() => setShowAddForm(true)}
           >
             <FaPlus className="text-sm" />
@@ -124,10 +121,10 @@ const ChartsofAccounts = () => {
           </button>
         </div>
       </div>
-      {/* Add Form */}
+
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-5 text-center rounded shadow-lg w-[650px] h-auto mt-10">
+          <div className="bg-white p-5 text-center rounded shadow-lg w-full max-w-md">
             <h1 className="text-lg font-semibold mb-5">Add Accountant</h1>
             <form className="space-y-6" onSubmit={handleAdd}>
               <div className="w-full text-left">
@@ -245,14 +242,17 @@ const ChartsofAccounts = () => {
           </div>
         </div>
       )}
-      {/* Display Accounts */}
+
       <div className="space-y-4">
         {filteredAccounts.map((account) => (
           <div
             key={account._id}
             className="border rounded-lg p-4 bg-white shadow-md"
           >
-            <div className="flex justify-between items-center">
+            <div
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() => toggleExpand(account._id)}
+            >
               <h2 className="text-lg font-semibold">{account.name}</h2>
               <button
                 className="text-gray-500"
@@ -266,28 +266,22 @@ const ChartsofAccounts = () => {
               </button>
             </div>
 
-            {/* Show sub-accounts if the account is expanded */}
             {expandedAccounts[account._id] && account.subCat.length > 0 && (
               <div className="mt-4 space-y-3">
-                <h3 className="text-md font-semibold">Sub-Accounts:</h3>
-                <table className="min-w-full border">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="px-4 py-2 text-left">Sub-Account Name</th>
-                      <th className="px-4 py-2 text-left">Amount</th>
-                      <th className="px-4 py-2 text-left">Type</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {account.subCat.map((sub) => (
-                      <tr key={sub._id} className="border-b">
-                        <td className="px-4 py-2">{sub.name}</td>
-                        <td className="px-4 py-2">{sub.amount}</td>
-                        <td className="px-4 py-2">{sub.account_nature}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <h3 className="text-md font-semibold">Sub Accounts:</h3>
+                {account.subCat.map((subAccount, index) => (
+                  <div key={index} className="p-2 border-l-4 border-[#067528]">
+                    <p>
+                      <strong>Name:</strong> {subAccount.name}
+                    </p>
+                    <p>
+                      <strong>Amount:</strong> {subAccount.amount}
+                    </p>
+                    <p>
+                      <strong>Nature:</strong> {subAccount.account_nature}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
           </div>

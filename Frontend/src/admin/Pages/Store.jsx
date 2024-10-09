@@ -18,8 +18,30 @@ const Store = () => {
   const [newStore, setNewStore] = useState("");
   const [editingStoreId, setEditingStoreId] = useState(null);
   const [editableStore, setEditableStore] = useState("");
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [searchQuery, setSearchQuery] = useState("");
+   const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 3;
+   const [sortOrder, setSortOrder] = useState({ key: "", order: "asc" });
+   const [sortConfig, setSortConfig] = useState({
+     key: "name",
+     direction: "asc",
+   });
 
+   const filteredStores = stores
+     .filter((store) =>
+       store.name?.toLowerCase().includes(searchQuery.toLowerCase())
+     )
+     .sort((a, b) => {
+       if (sortOrder.key) {
+         if (sortOrder.order === "asc") {
+           return a[sortOrder.key] > b[sortOrder.key] ? 1 : -1;
+         } else {
+           return a[sortOrder.key] < b[sortOrder.key] ? 1 : -1;
+         }
+       }
+       return 0;
+     });
+ 
   const fetchStores = async () => {
     try {
       const response = await axios.get(`${url}/store/get`);
@@ -97,23 +119,37 @@ const Store = () => {
     setEditingStoreId(null);
     setEditableStore("");
   };
+const handleSort = (key) => {
+  setSortOrder((prevSortOrder) => ({
+    key,
+    order: prevSortOrder.order === "asc" ? "desc" : "asc",
+  }));
+};
+  
+    const totalPages = Math.ceil(filteredStores.length / recordsPerPage);
+    const paginatedStore = filteredStores.slice(
+      (currentPage - 1) * recordsPerPage,
+      currentPage * recordsPerPage
+    );
 
-  // Filter stores based on the search query
-  const filteredStores = stores.filter((store) =>
-    store.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    const handlePageChange = (page) => {
+      if (page > 0 && page <= totalPages) {
+        setCurrentPage(page);
+      }
+    };
+
 
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Stores List</h1>
-      <div className="flex justify-between ">
+      <div className="flex justify-between flex-wrap gap-3">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
             placeholder="Search Accounts"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="h-full px-4 text-lg text-gray-500">
             <FaSearch />
@@ -167,73 +203,106 @@ const Store = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto mt-5">
-        <table className="table-auto w-full border-collapse bg-white shadow-lg rounded-lg">
-          <thead>
-            <tr className="bg-gray-200 text-gray-600 text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Store Name</th>
-              <th className="py-3 px-6 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-700 text-sm ">
-            {filteredStores.map(
-              (
-                store // Use filteredStores instead of stores
-              ) => (
-                <tr key={store._id} className="border-b border-gray-200">
-                  {editingStoreId === store._id ? (
-                    <>
-                      <td className="py-3 px-4 text-left">
-                        <input
-                          type="text"
-                          className="border w-full px-2 py-2"
-                          value={editableStore}
-                          onChange={handleEditChange}
-                        />
-                      </td>
-                      <td className="py-3 px-6 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={handleSaveEdit}
-                            className="bg-green-500 text-white rounded px-2 py-1"
-                          >
-                            <FaSave />
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="bg-gray-500 text-white rounded px-2 py-1"
-                          >
-                            <FaTimes />
-                          </button>
-                        </div>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="py-3 px-6 text-left">{store.name}</td>
-                      <td className="py-3 px-6 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => handleEditClick(store)}
-                            className="text-green-600 rounded px-2 py-1"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => handleRemoveStore(store._id)}
-                            className="text-red-500 rounded px-2 py-1"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              )
-            )}
-          </tbody>
-        </table>
+      <div className="mt-4 grid grid-cols-1 gap-4">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          <div className="grid grid-cols-2 bg-[#e0f2e9] text-sm md:text-base">
+            <div
+              className="py-3 text-center w-full text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("name")}
+            >
+              Store Name{" "}
+              {sortConfig.key === "name" ? (
+                <span className="inline-block ml-2 -mt-1 align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div className="py-3 md:px-4 text-center w-full text-gray-800 font-semibold">
+              Actions
+            </div>
+          </div>
+
+          {paginatedStore.map((store) => (
+            <div
+              key={store._id}
+              className="grid grid-cols-2 gap-2 border-b text-gray-700 text-sm hover:bg-gray-100"
+            >
+              <div className="py-3 px-6 text-center max-w-xs mx-auto">
+                {editingStoreId === store._id ? (
+                  <input
+                    type="text"
+                    className="border rounded px-2 w-full"
+                    value={editableStore}
+                    onChange={handleEditChange}
+                  />
+                ) : (
+                  store.name
+                )}
+              </div>
+              <div className="py-3 px-6 text-center w-full flex justify-center">
+                {editingStoreId === store._id ? (
+                  <>
+                    <button
+                      onClick={handleSaveEdit}
+                      className="bg-green-500 text-white rounded px-2 py-1 mr-2"
+                    >
+                      <FaSave />
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="bg-gray-500 text-white rounded px-2 py-1"
+                    >
+                      <FaTimes />
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex justify-center gap-2">
+                    <button
+                      onClick={() => handleEditClick(store)}
+                      className="text-green-600 rounded px-2 py-1"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleRemoveStore(store._id)}
+                      className="text-red-500 rounded px-2 py-1"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-2  mx-2 border rounded-lg ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &laquo;
+        </button>
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-2 mx-2 border rounded-lg ${
+            currentPage === totalPages
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &raquo;
+        </button>
       </div>
     </div>
   );

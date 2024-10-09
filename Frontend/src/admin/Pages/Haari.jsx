@@ -16,10 +16,28 @@ const Haari = () => {
   });
   const [editingHaariId, setEditingHaariId] = useState(null);
   const [editableData, setEditableData] = useState({});
-   const [searchQuery, setSearchQuery] = useState("");
-   const filteredHaari = haariList.filter((haari) =>
-     haari.name?.toLowerCase().includes(searchQuery.toLowerCase())
-   );
+  const [searchQuery, setSearchQuery] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const recordsPerPage = 6;
+    const [sortConfig, setSortConfig] = useState({
+      key: "name",
+      direction: "asc",
+    });
+
+    const filteredHaari = haariList
+      .filter((land) =>
+        land.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sortConfig.key) {
+          if (sortConfig.order === "asc") {
+            return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
+          } else {
+            return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
+          }
+        }
+        return 0;
+      });
 
 
   const fetchHaari = async () => {
@@ -100,7 +118,24 @@ const Haari = () => {
       console.log(error);
     }
   };
+   const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+ const totalPages = Math.ceil(filteredHaari.length / recordsPerPage);
+ const paginatedBank = filteredHaari.slice(
+   (currentPage - 1) * recordsPerPage,
+   currentPage * recordsPerPage
+ );
 
+ const handlePageChange = (page) => {
+   if (page > 0 && page <= totalPages) {
+     setCurrentPage(page);
+   }
+ };
   useEffect(() => {
     fetchHaari();
   }, []);
@@ -108,7 +143,7 @@ const Haari = () => {
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">Haari List</h1>
-      <div className="flex justify-between ">
+      <div className="flex justify-between flex-wrap gap-3">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
@@ -230,76 +265,98 @@ const Haari = () => {
         </div>
       )}
 
-      <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
-              Haari Name
-            </th>
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
-              Haari Phone#
-            </th>
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
+      <div className="mt-4 grid grid-cols-1 gap-4">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          <div className="grid grid-cols-4 bg-[#e0f2e9] text-xs md:text-base">
+            <div
+              className="py-3 text-center text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("name")}
+            >
+              Haari Name{" "}
+              {sortConfig.key === "name" ? (
+                <span className="inline-block ml-2 -mt-1 align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div
+              className="py-3 text-center text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("phone")}
+            >
+              Haari Phone#{" "}
+              {sortConfig.key === "phone" ? (
+                <span className="inline-block align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
               Haari NIC
-            </th>
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
+            </div>
+            <div className="py-3 text-center text-gray-800 font-semibold">
               Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredHaari.map((haari) => (
-            <tr key={haari._id} className="border-b hover:bg-gray-100">
-              <td className="py-3 px-4">
+            </div>
+          </div>
+
+          {paginatedBank.map((haari) => (
+            <div
+              key={haari._id}
+              className="grid grid-cols-4 gap-2 border-b text-gray-700 text-xs md:text-sm hover:bg-gray-100"
+            >
+              <div className="py-3 text-center max-w-xs">
                 {editingHaariId === haari._id ? (
                   <input
                     type="text"
                     name="name"
                     value={editableData.name}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-40"
+                    className="border rounded px-2 w-full"
                   />
                 ) : (
                   haari.name
                 )}
-              </td>
-              <td className="py-3 px-4">
+              </div>
+              <div className="py-3 text-center max-w-xs">
                 {editingHaariId === haari._id ? (
                   <input
                     type="text"
                     name="phone"
                     value={editableData.phone}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-40"
+                    className="border rounded px-2 w-full"
                   />
                 ) : (
                   haari.phone
                 )}
-              </td>
-              <td className="py-3 px-4">
+              </div>
+              <div className="py-3 text-center max-w-xs">
                 {editingHaariId === haari._id ? (
                   <input
                     type="text"
                     name="nic"
                     value={editableData.nic}
                     onChange={handleEditChange}
-                    className="border rounded px-2 w-44"
+                    className="border rounded px-2 w-full"
                   />
                 ) : (
                   haari.nic
                 )}
-              </td>
-              <td className="py-3 px-4 flex">
+              </div>
+              <div className="py-3 text-center px-7 md:px-20 flex">
                 {editingHaariId === haari._id ? (
                   <>
                     <button
-                      className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      className="text-green-500 py-1 md:px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={handleSaveClick}
                     >
                       <FaSave className="text-sm" />
                     </button>
                     <button
-                      className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                      className="text-gray-700 py-1 md:px-2 rounded-md flex items-center gap-2"
                       onClick={handleCancelEdit}
                     >
                       <FaTimes className="text-sm" />
@@ -308,24 +365,50 @@ const Haari = () => {
                 ) : (
                   <>
                     <button
-                      className=" text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      className="text-green-600 py-1 md:px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={() => handleEditClick(haari)}
                     >
                       <FaEdit className="text-sm" />
                     </button>
                     <button
-                      className=" text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
+                      className="text-red-600 py-1 md:px-2 rounded-md flex items-center"
                       onClick={() => removeHaari(haari._id)}
                     >
                       <FaTrash className="text-sm" />
                     </button>
                   </>
                 )}
-              </td>
-            </tr>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-2  mx-2 border rounded-lg ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &laquo;
+        </button>
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-2 mx-2 border rounded-lg ${
+            currentPage === totalPages
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          &raquo;
+        </button>
+      </div>
     </div>
   );
 };

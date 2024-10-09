@@ -5,9 +5,6 @@ import {
   FaUniversity,
   FaDesktop,
   FaUser,
-  FaBuilding,
-  FaLandmark,
-  FaTruck,
   FaBox,
   FaWarehouse,
   FaChartLine,
@@ -17,248 +14,228 @@ import {
   FaMapMarkedAlt,
   FaUserShield,
   FaUserCircle,
+  FaAngleLeft,
+  FaAngleRight,
 } from "react-icons/fa";
 
 const Sidebar = () => {
-  const [isHaariDropdownOpen, setIsHaariDropdownOpen] = useState(false);
-  const [isStockDropdownOpen, setIsStockDropdownOpen] = useState(false);
-  const [isVoucherDropdownOpen, setIsVoucherDropdownOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const linkClasses = ({ isActive }) => {
-    return `flex items-center justify-center md:justify-between gap-2 h-8 px-2 rounded-md cursor-pointer transition-all duration-200 ${
+    return `flex items-center gap-2 h-10 px-2 rounded-md cursor-pointer transition-all duration-200 ${
       isActive
         ? "bg-[#e0f2e9] text-[#067528]"
         : "text-[#f1f1f1] hover:bg-[#e0f2e9] hover:text-black"
     }`;
   };
 
+  const handleDropdownToggle = (dropdown) => {
+    setOpenDropdown(openDropdown === dropdown ? null : dropdown);
+  };
+
+  const handleSidebarToggle = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <div
-      className={`sidebar flex flex-col gap-3 pt-[12px] px-3.5 border border-t-0 border-l-0 border-gray-300 bg-white text-[#067528]  min-h-[100vh] md:w-[20%] w-[15%]`}
+      className={`flex ${
+        isSidebarOpen ? "md:w-[20%]" : "w-[60px]"
+      } transition-width duration-300`}
     >
-      <div className="logo mb-2.5">
-        <NavLink to="/admin">
-          <img
-            src={logo_light}
-            alt="Logo"
-            className="w-[110px] mx-auto hidden md:block"
-          />
-          <img
-            src={logo_light}
-            alt="Logo Icon"
-            className="w-[50px] mx-auto block md:hidden"
-          />
-        </NavLink>
-      </div>
+      <div className="sidebar flex flex-col gap-3 w-[100%] md:w-[100%] pt-4 px-1 md:px-4 border border-t-0 border-l-0 border-gray-300 bg-white text-[#067528] min-h-screen font-semibold relative">
+        {/* Toggle Button */}
+        <button
+          className="absolute top-4 right-4 text-2xl focus:outline-none"
+          onClick={handleSidebarToggle}
+        >
+          {isSidebarOpen ? <FaAngleLeft /> : <FaAngleRight />}
+        </button>
 
-      <div className="flex flex-col mt-2.5 gap-1.5 text-[10px] tracking-wider px-1.5 ">
-        {/* Dashboard */}
-        <NavLink className={linkClasses} to="dashboard">
-          <div className="flex items-center gap-2 text-[#067528] ">
-            <FaDesktop className="w-[16px] h-[16px] " />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Dashboards
-            </span>
-          </div>
-        </NavLink>
-
-        {/* Users */}
-        <NavLink className={linkClasses} to="user">
-          <div className="flex items-center gap-2 text-[#067528]">
-            <FaUserCircle className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Users
-            </span>
-          </div>
-        </NavLink>
-
-        {/* Role */}
-        <NavLink className={linkClasses} to="role">
-          <div className="flex items-center gap-2  text-[#067528]">
-            <FaUserShield className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Role
-            </span>
-          </div>
-        </NavLink>
-
-        {/* Haari (Dropdown) */}
-        <div className="relative">
-          <div
-            className={linkClasses({ isActive: false })}
-            onClick={() => setIsHaariDropdownOpen(!isHaariDropdownOpen)}
-          >
-            <div className="flex items-center justify-between w-full cursor-pointer">
-              <div className="flex items-center gap-2  text-[#067528]">
-                <FaUser className="w-[16px] h-[16px]" />
-                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-                  Haari
-                </span>
-              </div>
-
-              <span
-                className={`transition-transform ml-20 text-black duration-300 ${
-                  isHaariDropdownOpen ? "rotate-180" : "rotate-0"
-                }`}
-              >
-                ▼
-              </span>
-            </div>
-          </div>
-
-          {isHaariDropdownOpen && (
-            <div className="flex flex-col ml-6 mt-1 gap-1">
-              {/* Haari link */}
-              <NavLink className={linkClasses} to="haari">
-                <span className="text-[14px] tracking-wider font-[500] text-black ">
-                  Haari
-                </span>
-              </NavLink>
-
-              {/* Land with Haari link */}
-              <NavLink className={linkClasses} to="landxhaari">
-                <span className="text-[14px] tracking-wider font-[500] text-black ">
-                  Land with Haari
-                </span>
-              </NavLink>
-            </div>
-          )}
+        {/* Logo */}
+        <div className={`logo mb-2.5 ${!isSidebarOpen ? "hidden" : ""}`}>
+          <NavLink to="/admin">
+            <img
+              src={logo_light}
+              alt="Logo"
+              className={`mx-auto ${
+                isSidebarOpen ? "w-[70px] md:w-[100px]" : "w-[40px]"
+              } h-auto`}
+            />
+          </NavLink>
         </div>
 
-        {/* Land */}
-        <NavLink className={linkClasses} to="land">
-          <div className="flex items-center gap-2 text-[#067528]">
-            <FaMapMarkedAlt className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Land
-            </span>
-          </div>
-        </NavLink>
+        <div
+          className={`flex flex-col mt-2.5 gap-2 text-xs tracking-wider px-1.5 ${
+            !isSidebarOpen && "hidden"
+          }`}
+        >
+          {/* Dashboard */}
+          <NavLink className={linkClasses} to="dashboard">
+            <FaDesktop className="text-[#067528] w-4 h-4" />
+            <span className="text-black text-sm">Dashboards</span>
+          </NavLink>
 
-        <NavLink className={linkClasses} to="supplier">
-          <div className="flex items-center gap-2 text-[#067528]">
-            <FaPeopleCarry className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Vendors
-            </span>
-          </div>
-        </NavLink>
+          {/* Users */}
+          <NavLink className={linkClasses} to="user">
+            <FaUserCircle className="text-[#067528] w-4 h-4" />
+            <span className="text-black text-sm">Users</span>
+          </NavLink>
 
-        {/* Bank Accounts */}
-        <NavLink className={linkClasses} to="bankaccount">
-          <div className="flex items-center gap-2 text-[#067528]">
-            <FaUniversity className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
+          {/* Role */}
+          <NavLink className={linkClasses} to="role">
+            <FaUserShield className="text-[#067528] w-4 h-4" />
+            <span className="text-black text-sm">Role</span>
+          </NavLink>
+
+          {/* Land */}
+          <NavLink className={linkClasses} to="land">
+            <FaMapMarkedAlt className="text-[#067528] w-4 h-4" />
+            <span className="text-black text-sm">Land</span>
+          </NavLink>
+
+          {/* Haari (Dropdown) */}
+          <div className="relative">
+            <div
+              className={linkClasses({ isActive: false })}
+              onClick={() => handleDropdownToggle("haari")}
+            >
+              <div className="flex items-center justify-between w-full cursor-pointer">
+                <div className="flex items-center gap-1 text-[#067528]">
+                  <FaUser className="text-[#067528] w-4 h-4" />
+                  <span className="text-black text-sm">Haari</span>
+                </div>
+                <span
+                  className={`transition-transform ml-1 text-black duration-300 ${
+                    openDropdown === "haari" ? "rotate-180" : "rotate-0"
+                  }`}
+                >
+                  ▼
+                </span>
+              </div>
+            </div>
+            {isSidebarOpen && (
+              <div
+                className={`flex flex-col ml-6 text-center mt-1 gap-1 overflow-hidden transition-max-height duration-300 ease-in-out ${
+                  openDropdown === "haari" ? "max-h-40" : "max-h-0"
+                }`}
+              >
+                <NavLink className={linkClasses} to="haari">
+                  <span className="text-black md:text-xs">Haari</span>
+                </NavLink>
+                <NavLink className={linkClasses} to="landxhaari">
+                  <span className="text-black md:text-xs">Assign Land</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
+
+          {/* Vendors */}
+          <NavLink className={linkClasses} to="supplier">
+            <FaPeopleCarry className="text-[#067528] w-4 h-4" />
+            <span className=" text-black text-sm">Vendors</span>
+          </NavLink>
+
+          {/* Bank Accounts */}
+          <NavLink className={linkClasses} to="bankaccount">
+            <FaUniversity className="text-[#067528] w-4 h-4" />
+            <span className="text-black text-sm text-nowrap">
               Bank Accounts
             </span>
-          </div>
-        </NavLink>
+          </NavLink>
 
-        {/* Store */}
-        <NavLink className={linkClasses} to="store">
-          <div className="flex items-center gap-2 text-[#067528]">
-            <FaStore className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Store
-            </span>
-          </div>
-        </NavLink>
+          {/* Store */}
+          <NavLink className={linkClasses} to="store">
+            <FaStore className="text-[#067528] w-4 h-4" />
+            <span className=" text-black text-sm">Store</span>
+          </NavLink>
 
-        {/* Items */}
-        <NavLink className={linkClasses} to="item">
-          <div className="flex items-center gap-2  text-[#067528]">
-            <FaBox className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Items
-            </span>
-          </div>
-        </NavLink>
+          {/* Items */}
+          <NavLink className={linkClasses} to="item">
+            <FaBox className="text-[#067528] w-4 h-4" />
+            <span className=" text-black text-sm">Items</span>
+          </NavLink>
 
-        <div className="relative">
-          <div
-            className={linkClasses({ isActive: false })}
-            onClick={() => setIsStockDropdownOpen(!isStockDropdownOpen)}
-          >
-            <div className="flex items-center justify-between w-full cursor-pointer transition-all">
-              <div className="flex items-center gap-2  text-[#067528]">
-                <FaWarehouse className="w-[16px] h-[16px]" />
-                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-                  Stock
+          {/* Stock (Dropdown) */}
+          <div className="relative">
+            <div
+              className={linkClasses({ isActive: false })}
+              onClick={() => handleDropdownToggle("stock")}
+            >
+              <div className="flex items-center justify-between w-full cursor-pointer transition-all">
+                <div className="flex items-center gap-2 text-[#067528]">
+                  <FaWarehouse className="text-[#067528] w-4 h-4" />
+                  <span className="text-black text-sm">Stock</span>
+                </div>
+                <span
+                  className={`transition-transform ml-1 text-black duration-300 ${
+                    openDropdown === "stock" ? "rotate-180" : "rotate-0"
+                  }`}
+                >
+                  ▼
                 </span>
               </div>
-
-              <span
-                className={`transition-transform ml-20 text-black duration-300 ${
-                  isStockDropdownOpen ? "rotate-180" : "rotate-0"
+            </div>
+            {isSidebarOpen && (
+              <div
+                className={`flex flex-col ml-6 mt-1 gap-1 text-center overflow-hidden transition-max-height duration-300 ease-in-out ${
+                  openDropdown === "stock" ? "max-h-40" : "max-h-0"
                 }`}
               >
-                ▼
-              </span>
-            </div>
+                <NavLink className={linkClasses} to="stock_consume">
+                  <span className="text-black text-xs">Stock Consume</span>
+                </NavLink>
+                <NavLink className={linkClasses} to="stock_recieve">
+                  <span className="text-black text-xs">Stock Recieve</span>
+                </NavLink>
+              </div>
+            )}
           </div>
 
-          {isStockDropdownOpen && (
-            <div className="flex flex-col ml-6 mt-1 gap-1">
-              {/* Haari link */}
-              <NavLink className={linkClasses} to="stock_consume">
-                <span className="text-[14px] tracking-wider font-[500] text-black ">
-                  Stock Consume
-                </span>
-              </NavLink>
-
-              {/* Land with Haari link */}
-              <NavLink className={linkClasses} to="stock_recieve">
-                <span className="text-[14px] tracking-wider font-[500] text-black ">
-                  Stock Recieve
-                </span>
-              </NavLink>
-            </div>
-          )}
-        </div>
-        <NavLink className={linkClasses} to="chartsofaccounts">
-          <div className="flex items-center gap-2 text-[#067528]">
-            <FaChartLine className="w-[16px] h-[16px]" />
-            <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-              Charts of Accounts
-            </span>
-          </div>
-        </NavLink>
-        <div className="relative">
-          <div
-            className={linkClasses({ isActive: false })}
-            onClick={() => setIsVoucherDropdownOpen(!isVoucherDropdownOpen)}
-          >
-            <div className="flex items-center justify-between w-full cursor-pointer transition-all">
-              <div className="flex items-center gap-2  text-[#067528]">
-                <FaReceipt className="w-[16px] h-[16px]" />
-                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-                  Vouchers
+          <div className="relative">
+            <div
+              className={linkClasses({ isActive: false })}
+              onClick={() => handleDropdownToggle("vouchers")}
+            >
+              <div className="flex items-center justify-between w-full cursor-pointer transition-all">
+                <div className="flex items-center gap-1 text-[#067528]">
+                  <FaReceipt className="text-[#067528] w-4 h-4" />
+                  <span className="text-black text-sm">Vouchers</span>
+                </div>
+                <span
+                  className={`transition-transform ml-1 text-black duration-300 ${
+                    openDropdown === "vouchers" ? "rotate-180" : "rotate-0"
+                  }`}
+                >
+                  ▼
                 </span>
               </div>
-
-              <span
-                className={`transition-transform ml-20 text-black duration-300 ${
-                  isVoucherDropdownOpen ? "rotate-180" : "rotate-0"
+            </div>
+            {isSidebarOpen && (
+              <div
+                className={`flex flex-col ml-6 mt-1 gap-1 text-center overflow-hidden transition-max-height duration-300 ease-in-out ${
+                  openDropdown === "vouchers" ? "max-h-40" : "max-h-0"
                 }`}
               >
-                ▼
-              </span>
-            </div>
+                <NavLink className={linkClasses} to="journalvoucher">
+                  <span className="text-black text-xs">Journal Voucher</span>
+                </NavLink>
+                <NavLink className={linkClasses} to="paymentvoucher">
+                  <span className="text-black text-xs">Payment Voucher</span>
+                </NavLink>
+                <NavLink className={linkClasses} to="recievevoucher">
+                  <span className="text-black text-xs">Recieve Voucher</span>
+                </NavLink>
+              </div>
+            )}
           </div>
 
-          {isVoucherDropdownOpen && (
-            <div className="flex flex-col ml-6 mt-1 gap-1">
-              <NavLink className={linkClasses} to="paymentvoucher">
-                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-                  Payment Voucher
-                </span>
-              </NavLink>
-              <NavLink className={linkClasses} to="recievevoucher">
-                <span className="text-[14px] tracking-wider font-[500] hidden md:inline-block text-black">
-                  Recieve Voucher
-                </span>
-              </NavLink>
-            </div>
-          )}
+        
+          <NavLink className={linkClasses} to="chartsofaccounts">
+            <FaChartLine className="text-[#067528] w-4 h-4" />
+            <span className="text-black text-sm">Charts of Account</span>
+          </NavLink>
         </div>
       </div>
     </div>

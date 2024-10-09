@@ -1,6 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaSearch,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -11,36 +18,31 @@ const Suppliers = () => {
   const [newSupplier, setNewSupplier] = useState({
     name: "",
     phone: "",
-    nic:"",
+    nic: "",
     amount: "",
   });
   const [editingSupplierId, setEditingSupplierId] = useState(null);
   const [editableData, setEditableData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
-   const [currentPage, setCurrentPage] = useState(1);
-   const rowsPerPage = 6;
-   const filteredSupplier = supplierList.filter((supplier) =>
-     supplier.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-    const [sortConfig, setSortConfig] = useState({
-      key: "name",
-      direction: "asc",
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 6;
+  const [sortConfig, setSortConfig] = useState({
+    key: "name",
+    direction: "asc",
+  });
+  const filteredSupplier = supplierList
+    .filter((supplier) =>
+      supplier.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
     });
-
-    const sortedSupplier = supplierList
-      .filter((supplier) =>
-        supplier.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-  
 
   const fetchSupplier = async () => {
     try {
@@ -55,9 +57,9 @@ const Suppliers = () => {
     e.preventDefault();
     try {
       await axios.post(`${url}/supplier/add`, newSupplier);
-             toast.success("Vendor Added Successfully!");
+      toast.success("Vendor Added Successfully!");
       setShowAddForm(false);
-      setNewSupplier({ name: "", phone: "",nic:"", amount: "" });
+      setNewSupplier({ name: "", phone: "", nic: "", amount: "" });
       fetchSupplier();
     } catch (error) {
       console.log("Error adding Supplier:", error);
@@ -108,32 +110,32 @@ const Suppliers = () => {
     const { name, value } = e.target;
     setNewSupplier({ ...newSupplier, [name]: value });
   };
-    const handleSort = (key) => {
-      let direction = "asc";
-      if (sortConfig.key === key && sortConfig.direction === "asc") {
-        direction = "desc";
-      }
-      setSortConfig({ key, direction });
-    };
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-   const startIndex = (currentPage - 1) * rowsPerPage;
-   const paginatedSuppliers = filteredSupplier.slice(
-     startIndex,
-     startIndex + rowsPerPage
-   );
-   const totalPages = Math.ceil(filteredSupplier.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedSuppliers = filteredSupplier.slice(
+    startIndex,
+    startIndex + rowsPerPage
+  );
+  const totalPages = Math.ceil(filteredSupplier.length / rowsPerPage);
 
   useEffect(() => {
     fetchSupplier();
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-5">
       <h1 className="text-xl mb-5 font-semibold text-left">Vendors List</h1>
-      <div className="flex justify-between ">
+      <div className="flex justify-between flex-wrap gap-3">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
@@ -146,6 +148,7 @@ const Suppliers = () => {
             <FaSearch />
           </button>
         </div>
+
         <div>
           <button
             className="bg-[#067528] text-white font-semibold px-4 flex items-center gap-2 rounded-md py-2 mb-5"
@@ -256,46 +259,75 @@ const Suppliers = () => {
         </div>
       )}
 
-      <table className="min-w-full max-w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Vendor Name
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Phone
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              NIC
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Amount
-            </th>
-            <th className="py-3 px-4 text-left text-gray-600 font-semibold">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedSuppliers.map((supplier) => (
-            <tr
-              key={supplier._id}
-              className="border-b text-gray-700 text-sm hover:bg-gray-100"
+      <div className="mt-4 grid grid-cols-1 gap-4">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          <div className="grid grid-cols-5 bg-[#e0f2e9] text-sm md:text-base">
+            <div
+              className="py-3  text-center text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("name")}
             >
-              <td className="py-3 px-4 max-w-xs">
+              Vendor Name{" "}
+              {sortConfig.key === "name" ? (
+                <span className="inline-block ml-2 -mt-1 align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div
+              className="py-3 text-center text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("phone")}
+            >
+              Phone{" "}
+              {sortConfig.key === "phone" ? (
+                <span className="inline-block align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div className="py-3  text-center text-gray-800 font-semibold">
+              NIC
+            </div>
+            <div
+              className="py-3 text-center text-gray-800 font-semibold cursor-pointer"
+              onClick={() => handleSort("amount")}
+            >
+              Amount{" "}
+              {sortConfig.key === "amount" ? (
+                <span className="inline-block align-middle text-xs">
+                  {sortConfig.direction === "asc" ? "▲" : "▼"}
+                </span>
+              ) : (
+                ""
+              )}
+            </div>
+            <div className="py-3 px-4 text-center text-gray-800 font-semibold">
+              Actions
+            </div>
+          </div>
+
+          {paginatedSuppliers.map((supplier) => (
+            <div
+              key={supplier._id}
+              className="grid grid-cols-5 gap-2 border-b text-gray-700 text-xs md:text-sm hover:bg-gray-100"
+            >
+              <div className="py-3 text-center max-w-xs">
                 {editingSupplierId === supplier._id ? (
                   <input
                     type="text"
                     name="name"
                     value={editableData.name}
                     onChange={handleEditChange}
-                    className="border rounded px- w-full"
+                    className="border rounded px-2 w-full"
                   />
                 ) : (
                   supplier.name
                 )}
-              </td>
-              <td className="py-3 px-4 max-w-xs">
+              </div>
+              <div className="py-3 text-center max-w-xs">
                 {editingSupplierId === supplier._id ? (
                   <input
                     type="text"
@@ -307,8 +339,8 @@ const Suppliers = () => {
                 ) : (
                   supplier.phone
                 )}
-              </td>
-              <td className="py-3 px-4 max-w-xs">
+              </div>
+              <div className="py-3 px-4 text-center max-w-xs">
                 {editingSupplierId === supplier._id ? (
                   <input
                     type="text"
@@ -320,8 +352,8 @@ const Suppliers = () => {
                 ) : (
                   supplier.nic
                 )}
-              </td>
-              <td className="py-3 px-9 max-w-xs">
+              </div>
+              <div className="py-3 px-4 text-center max-w-xs">
                 {editingSupplierId === supplier._id ? (
                   <input
                     type="number"
@@ -333,18 +365,18 @@ const Suppliers = () => {
                 ) : (
                   supplier.amount
                 )}
-              </td>
-              <td className="py-3 px-4 flex">
+              </div>
+              <div className="py-3 px-3 md:px-[75px] text-center flex">
                 {editingSupplierId === supplier._id ? (
                   <>
                     <button
-                      className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      className=" text-green-500 py-1 md:px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={handleSaveClick}
                     >
                       <FaSave className="text-sm" />
                     </button>
                     <button
-                      className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                      className=" text-gray-700 py-1 md:px-2 rounded-md flex items-center gap-2"
                       onClick={handleCancelEdit}
                     >
                       <FaTimes className="text-sm" />
@@ -353,38 +385,100 @@ const Suppliers = () => {
                 ) : (
                   <>
                     <button
-                      className=" text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                      className=" text-green-600 py-1 md:px-2 rounded-md flex items-center gap-2 mr-2"
                       onClick={() => handleEditClick(supplier)}
                     >
                       <FaEdit className="text-sm" />
                     </button>
                     <button
-                      className=" text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
+                      className=" text-red-600 py-1 md:px-2 rounded-md flex items-center "
                       onClick={() => handleDelete(supplier._id)}
                     >
                       <FaTrash className="text-sm" />
                     </button>
                   </>
                 )}
-              </td>
-            </tr>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
-      <div className="mt-4 flex justify-center">
-        {Array.from({ length: totalPages }, (_, i) => (
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-2 mx-1 border rounded ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          &laquo;
+        </button>
+        <button
+          onClick={() => handlePageChange(1)}
+          className={`px-2 mx-1 border rounded ${
+            currentPage === 1
+              ? "bg-green-500 text-white"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          1
+        </button>
+        {currentPage > 3 && <span className="mx-1 text-gray-700">...</span>}
+
+        {Array.from({ length: Math.min(2, totalPages - 2) }, (_, i) => {
+          const page =
+            currentPage <= totalPages - 3
+              ? currentPage + i
+              : totalPages - 5 + i;
+
+          if (page > 1 && page < totalPages) {
+            return (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-2 mx-1 border rounded ${
+                  currentPage === page
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {page}
+              </button>
+            );
+          }
+          return null;
+        })}
+        {currentPage < totalPages - 2 && (
+          <span className="mx-1 text-gray-700">...</span>
+        )}
+
+        {totalPages > 1 && (
           <button
-            key={i}
-            onClick={() => handlePageChange(i + 1)}
+            onClick={() => handlePageChange(totalPages)}
             className={`px-2 mx-1 border rounded ${
-              currentPage === i + 1
+              currentPage === totalPages
                 ? "bg-green-500 text-white"
                 : "bg-gray-100 text-gray-700"
             }`}
           >
-            {i + 1}
+            {totalPages}
           </button>
-        ))}
+        )}
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-2 mx-1 border rounded ${
+            currentPage === totalPages
+              ? "bg-gray-300 text-gray-500"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          &raquo;
+        </button>
       </div>
     </div>
   );

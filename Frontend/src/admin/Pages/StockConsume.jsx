@@ -30,6 +30,7 @@ const StockConsume = () => {
       console.error("Error fetching land names:", error);
     }
   };
+
   const fetchLandxHaari = async () => {
     try {
       const response = await axios.get(`${url}/landxhaari/get`);
@@ -38,6 +39,7 @@ const StockConsume = () => {
       console.error("Error fetching land names:", error);
     }
   };
+
   const fetchItems = async () => {
     try {
       const response = await axios.get(`${url}/items/view`);
@@ -46,6 +48,7 @@ const StockConsume = () => {
       console.error("Error fetching items:", error);
     }
   };
+
   const handleHaariChange = (e) => {
     const selectedHaariId = e.target.value;
     setSelectedHaari(selectedHaariId);
@@ -53,12 +56,12 @@ const StockConsume = () => {
       .filter((lxh) => lxh.haariId._id === selectedHaariId)
       .flatMap((lxh) => lxh.land.map((land) => land.land_id._id));
 
-    console.log("Assigned land IDs:", assignedLandIds);
     const filteredLands = landNames.filter((land) =>
       assignedLandIds.includes(land._id)
     );
     setFilteredLands(filteredLands);
   };
+
   const handleAddItem = () => {
     setAppendedItems((prevItems) => [
       ...prevItems,
@@ -97,13 +100,12 @@ const StockConsume = () => {
       });
 
       if (response.data.success) {
-       toast.success("Stock Consumed Successfully!");
+        toast.success("Stock Consumed Successfully!");
         setAppendedItems([]);
         setSelectedHaari("");
         await fetchHaari();
         window.location.reload();
-      }
-      else {
+      } else {
         alert(response.data.message);
       }
     } catch (error) {
@@ -130,16 +132,13 @@ const StockConsume = () => {
     fetchLandxHaari();
     fetchItems();
   }, []);
-  useEffect(() => {
-    console.log(landxHaari);
-  }, [landxHaari]);
 
   return (
     <div>
       <h2 className="text-2xl text-center font-bold mb-10 mt-5">
         Stock Consume
       </h2>
-      <div className="p-6 bg-gray-100 rounded-lg ">
+      <div className="p-6 bg-gray-100 rounded-lg">
         <div className="mb-4">
           <label
             htmlFor="haari"
@@ -189,7 +188,7 @@ const StockConsume = () => {
               <tr key={index} className="hover:bg-gray-100 transition-colors">
                 <td className="py-3 px-4">
                   <select
-                    className="border outline-none border-gray-300 rounded-md p-2 w-72"
+                    className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-72"
                     value={row.itemId}
                     onChange={(e) =>
                       handleRowChange(index, "itemId", e.target.value)
@@ -206,7 +205,7 @@ const StockConsume = () => {
                 </td>
                 <td className="py-3 px-4">
                   <select
-                    className="border outline-none border-gray-300 rounded-md p-2 w-72"
+                    className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-72"
                     value={row.land_id}
                     onChange={(e) =>
                       handleRowChange(index, "land_id", e.target.value)
@@ -253,17 +252,16 @@ const StockConsume = () => {
           </tbody>
         </table>
 
-        <div className="space-x-2">
+        <div className="flex justify-between mb-4">
           <button
             onClick={handleAddItem}
-            className="bg-blue-500 text-white px-2 py-1 rounded-md mb-4"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
           >
             Add Item
           </button>
-
           <button
             onClick={handleSaveItems}
-            className="bg-green-500 text-white px-4 py-1 rounded-md"
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-200"
           >
             Save
           </button>

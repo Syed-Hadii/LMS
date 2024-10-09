@@ -19,8 +19,10 @@ import StockRecieved from "./StockRecieved";
 import ChartsofAccounts from "./ChartsofAccounts";
 import PaymentVoucher from "./PaymentVoucher";
 import RecieveVoucher from "./RecieveVoucher";
+import JournalVoucher from "./JournalVoucher";
 
 const Admin = () => {
+  
   const [roles, setRoles] = useState([]);
   const handleRolesChange = (newRoles) => {
     setRoles(newRoles);
@@ -51,6 +53,7 @@ const Admin = () => {
           <Route path="/chartsofaccounts" element={<ChartsofAccounts />} />
           <Route path="/paymentvoucher" element={<PaymentVoucher />} />
           <Route path="/recievevoucher" element={<RecieveVoucher />} />
+          <Route path="/journalvoucher" element={<JournalVoucher />} />
         </Routes>
       </div>
       <ToastContainer />

@@ -1,27 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaSearch,
+} from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RotatingLines } from "react-loader-spinner";
 
 const Item = () => {
   const url = "http://localhost:3002";
   const [showAddForm, setShowAddForm] = useState(false);
-  const [itemList, setItemList] = useState([]);
- const [stores, setStores] = useState([]);
- const [newItems, setNewItems] = useState({
-   name: "",
-   unit: "",
-   store_id: "",
-   pkg_qty: "",
-   pkg_amount: "",
-   stock: "",
- });
+  const [stores, setStores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newItems, setNewItems] = useState({
+    name: "",
+    unit: "",
+    store_id: "",
+    pkg_qty: "",
+    pkg_amount: "",
+  });
   const [editingItemId, setEditingItemId] = useState(null);
   const [editableData, setEditableData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 6;
+  const recordsPerPage = 7;
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemList, setItemList] = useState([]);
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",
@@ -40,25 +49,41 @@ const Item = () => {
       return 0;
     });
 
-useEffect(() => {
-  const fetchStores = async () => {
-    try {
-      const response = await axios.get(`${url}/store/get`);
-      setStores(response.data.data); 
-    } catch (error) {
-      console.error("Error fetching stores:", error);
-    }
-  };
+  useEffect(() => {
+    const fetchStores = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${url}/store/get`);
 
-  fetchStores();
-}, []);
+        setStores(response.data.data);
+      } catch (error) {
+        console.error("Error fetching stores:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStores();
+  }, []);
 
   const fetchItems = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get(`${url}/items/view`);
-      setItemList(response.data.data);
+      const response = await axios.get(
+        `${url}/items/view?page=${currentPage}&limit=${recordsPerPage}&search=${searchQuery}`
+      );
+      if (response) {
+        setItemList(response.data.ItemList);
+        console.log(response);
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(response.data.currentPage);
+      } else {
+        setItemList([]);
+      }
     } catch (error) {
       console.error("Error fetching items:", error);
+    } finally {
+      setLoading(false);
     }
   };
   const handleAdd = async (e) => {
@@ -73,7 +98,6 @@ useEffect(() => {
         store_id: "",
         pkg_qty: "",
         pkg_amount: "",
-        stock: "",
       });
       fetchItems();
     } catch (error) {
@@ -108,48 +132,78 @@ useEffect(() => {
     setEditableData({});
   };
   const handleDelete = async (id) => {
+    toast.info(
+      <div>
+        Are you sure you want to delete this item?
+        <div className="flex justify-end mt-2">
+          <button
+            onClick={() => deleteVoucher(id)}
+            className="mr-2 px-2 py-1 bg-red-500 text-white rounded"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            className="px-2 py-1 bg-gray-400 text-white rounded"
+          >
+            No
+          </button>
+        </div>
+      </div>,
+      { autoClose: false }
+    );
+  };
+
+  const deleteVoucher = async (id) => {
+    setLoading(true);
     try {
-      await axios.delete(`${url}/items/delete`, { data: { id } });
-      fetchItems();
+      const response = await axios.delete(`${url}/items/delete`, {
+        data: { id },
+      });
+      if (response.data.success) {
+        toast.dismiss();
+        toast.success("Item deleted successfully!");
+        fetchItems();
+      } else {
+        toast.error("Error deleting item");
+      }
     } catch (error) {
       console.error("Error deleting item:", error);
+      toast.error("Error deleting item");
+    } finally {
+      setLoading(false);
     }
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewItems({ ...newItems, [name]: value });
   };
-   const handleSort = (key) => {
-     let direction = "asc";
-     if (sortConfig.key === key && sortConfig.direction === "asc") {
-       direction = "desc";
-     }
-     setSortConfig({ key, direction });
-   };
-    const totalPages = Math.ceil(filteredItems.length / recordsPerPage);
-    const paginatedBank = filteredItems.slice(
-      (currentPage - 1) * recordsPerPage,
-      currentPage * recordsPerPage
-    );
-
-    const handlePageChange = (page) => {
-      if (page > 0 && page <= totalPages) {
-        setCurrentPage(page);
-      }
-    };
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+  const handlePageChange = (page) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [currentPage, searchQuery]);
 
   return (
     <div className="p-6">
-      <h1 className="text-xl mb-5 font-semibold text-left">Users List</h1>
+      <h1 className="text-xl mb-5 font-semibold text-left">Item List</h1>
       <div className="flex justify-between flex-wrap gap-3">
         <div className="border border-gray-400 rounded-md h-10 flex">
           <input
             type="text"
             className="outline-none w-72 rounded-md px-2 py-1.5"
-            placeholder="Search Role"
+            placeholder="Search Item"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -163,7 +217,7 @@ useEffect(() => {
             onClick={() => setShowAddForm(true)}
           >
             <FaPlus className="text-sm" />
-            Add User
+            Add Item
           </button>
         </div>
       </div>
@@ -277,23 +331,6 @@ useEffect(() => {
                     required
                   />
                 </div>
-                <div className="w-full">
-                  <label
-                    className="block text-left font-semibold mb-1"
-                    htmlFor="stock"
-                  >
-                    Stock
-                  </label>
-                  <input
-                    type="number"
-                    name="stock"
-                    className="border w-full px-2 outline-none py-2 rounded-md"
-                    placeholder="Stock"
-                    value={newItems.stock}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
               </div>
 
               <div className="pt-8 flex justify-end gap-7">
@@ -315,217 +352,172 @@ useEffect(() => {
           </div>
         </div>
       )}
-
-      <div className="mt-4 grid grid-cols-1 gap-4">
-        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-          {/* Header Row */}
-          <div className="grid grid-cols-4 bg-[#e0f2e9] text-center text-sm md:text-base">
-            <div
-              className="py-3 text-gray-800 font-semibold cursor-pointer"
-              onClick={() => handleSort("name")}
-            >
-              Name{" "}
-              {sortConfig.key === "name" ? (
-                <span className="inline-block ml-2 -mt-1 align-middle text-xs">
-                  {sortConfig.direction === "asc" ? "▲" : "▼"}
-                </span>
-              ) : (
-                ""
-              )}
-            </div>
-            <div
-              className="py-3 text-gray-800 font-semibold cursor-pointer"
-              onClick={() => handleSort("unit")}
-            >
-              Unit{" "}
-              {sortConfig.key === "unit" ? (
-                <span className="inline-block align-middle text-xs">
-                  {sortConfig.direction === "asc" ? "▲" : "▼"}
-                </span>
-              ) : (
-                ""
-              )}
-            </div>
-            <div
-              className="py-3 text-gray-800 font-semibold cursor-pointer"
-              onClick={() => handleSort("pkg_qty")}
-            >
-              Package Quantity{" "}
-              {sortConfig.key === "pkg_qty" ? (
-                <span className="inline-block align-middle text-xs">
-                  {sortConfig.direction === "asc" ? "▲" : "▼"}
-                </span>
-              ) : (
-                ""
-              )}
-            </div>
-            <div className="py-3 text-gray-800 font-semibold">Actions</div>
-          </div>
-
-          {/* Data Rows */}
-          {paginatedBank.map((item) => (
-            <div
-              key={item._id}
-              className="grid grid-cols-4 gap-2 border-b text-gray-700 text-xs md:text-sm hover:bg-gray-100"
-            >
-              {/* Name Column */}
-              <div className="py-3 text-center">
-                {editingItemId === item._id ? (
-                  <input
-                    type="text"
-                    name="name"
-                    value={editableData.name}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  item.name
-                )}
-              </div>
-
-              {/* Unit Column */}
-              <div className="py-3 text-center">
-                {editingItemId === item._id ? (
-                  <input
-                    type="text"
-                    name="unit"
-                    value={editableData.unit}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  item.unit
-                )}
-              </div>
-
-              {/* Package Quantity Column */}
-              <div className="py-3 text-center">
-                {editingItemId === item._id ? (
-                  <input
-                    type="number"
-                    name="pkg_qty"
-                    value={editableData.pkg_qty}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  item.pkg_qty
-                )}
-              </div>
-
-              {/* Actions Column */}
-              <div className="py-3 text-center flex justify-center">
-                {editingItemId === item._id ? (
-                  <>
-                    <button
-                      className="text-green-500 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
-                      onClick={handleSaveClick}
-                    >
-                      <FaSave className="text-sm" />
-                    </button>
-                    <button
-                      className="text-gray-700 py-1 px-2 rounded-md flex items-center gap-2"
-                      onClick={handleCancelEdit}
-                    >
-                      <FaTimes className="text-sm" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
-                      onClick={() => handleEditClick(item)}
-                    >
-                      <FaEdit className="text-sm" />
-                    </button>
-                    <button
-                      className="text-red-600 py-1 px-2 rounded-md flex items-center"
-                      onClick={() => handleDelete(item._id)}
-                    >
-                      <FaTrash className="text-sm" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <RotatingLines width="50" strokeColor="#067528" />
         </div>
-      </div>
+      ) : (
+        <div className="mt-4 grid grid-cols-1 gap-4">
+          <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+            {/* Header Row */}
+            <div className="grid grid-cols-4 bg-[#e0f2e9] text-center text-sm md:text-base">
+              <div
+                className="py-3 text-gray-800 font-semibold cursor-pointer"
+                onClick={() => handleSort("name")}
+              >
+                Name{" "}
+                {sortConfig.key === "name" ? (
+                  <span className="inline-block ml-2 -mt-1 align-middle text-xs">
+                    {sortConfig.direction === "asc" ? "▲" : "▼"}
+                  </span>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div
+                className="py-3 text-gray-800 font-semibold cursor-pointer"
+                onClick={() => handleSort("unit")}
+              >
+                Unit{" "}
+                {sortConfig.key === "unit" ? (
+                  <span className="inline-block align-middle text-xs">
+                    {sortConfig.direction === "asc" ? "▲" : "▼"}
+                  </span>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div
+                className="py-3 text-gray-800 font-semibold cursor-pointer"
+                onClick={() => handleSort("pkg_qty")}
+              >
+                Package Quantity{" "}
+                {sortConfig.key === "pkg_qty" ? (
+                  <span className="inline-block align-middle text-xs">
+                    {sortConfig.direction === "asc" ? "▲" : "▼"}
+                  </span>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="py-3 text-gray-800 font-semibold">Actions</div>
+            </div>
 
-      <div className="mt-4 flex justify-end">
+            {/* Data Rows */}
+            {filteredItems.map((item) => (
+              <div
+                key={item._id}
+                className="grid grid-cols-4 gap-2 border-b text-gray-700 text-xs md:text-sm hover:bg-gray-100"
+              >
+                {/* Name Column */}
+                <div className="py-3 text-center">
+                  {editingItemId === item._id ? (
+                    <input
+                      type="text"
+                      name="name"
+                      value={editableData.name}
+                      onChange={handleEditChange}
+                      className="border rounded px-2 w-full"
+                    />
+                  ) : (
+                    item.name
+                  )}
+                </div>
+
+                {/* Unit Column */}
+                <div className="py-3 text-center">
+                  {editingItemId === item._id ? (
+                    <input
+                      type="text"
+                      name="unit"
+                      value={editableData.unit}
+                      onChange={handleEditChange}
+                      className="border rounded px-2 w-full"
+                    />
+                  ) : (
+                    item.unit
+                  )}
+                </div>
+
+                {/* Package Quantity Column */}
+                <div className="py-3 text-center">
+                  {editingItemId === item._id ? (
+                    <input
+                      type="number"
+                      name="pkg_qty"
+                      value={editableData.pkg_qty}
+                      onChange={handleEditChange}
+                      className="border rounded px-2 w-full"
+                    />
+                  ) : (
+                    item.pkg_qty
+                  )}
+                </div>
+
+                {/* Actions Column */}
+                <div className="py-3 text-center flex justify-center">
+                  {editingItemId === item._id ? (
+                    <>
+                      <button
+                        className="text-green-500 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                        onClick={handleSaveClick}
+                      >
+                        <FaSave className="text-sm" />
+                      </button>
+                      <button
+                        className="text-gray-700 py-1 px-2 rounded-md flex items-center gap-2"
+                        onClick={handleCancelEdit}
+                      >
+                        <FaTimes className="text-sm" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                        onClick={() => handleEditClick(item)}
+                      >
+                        <FaEdit className="text-sm" />
+                      </button>
+                      <button
+                        className="text-red-600 py-1 px-2 rounded-md flex items-center"
+                        onClick={() => handleDelete(item._id)}
+                      >
+                        <FaTrash className="text-sm" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="mt-4 flex justify-end items-center">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-2 mx-1 border rounded ${
+          className={`px-4 py-2 mx-2 border rounded-lg ${
             currentPage === 1
-              ? "bg-gray-300 text-gray-500"
-              : "bg-gray-100 text-gray-700"
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          &laquo;
+          &laquo; Previous
         </button>
-        <button
-          onClick={() => handlePageChange(1)}
-          className={`px-2 mx-1 border rounded ${
-            currentPage === 1
-              ? "bg-green-500 text-white"
-              : "bg-gray-100 text-gray-700"
-          }`}
-        >
-          1
-        </button>
-        {currentPage > 3 && <span className="mx-1 text-gray-700">...</span>}
-
-        {Array.from({ length: Math.min(2, totalPages - 2) }, (_, i) => {
-          const page =
-            currentPage <= totalPages - 3
-              ? currentPage + i
-              : totalPages - 5 + i;
-
-          if (page > 1 && page < totalPages) {
-            return (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-2 mx-1 border rounded ${
-                  currentPage === page
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {page}
-              </button>
-            );
-          }
-          return null;
-        })}
-        {currentPage < totalPages - 2 && (
-          <span className="mx-1 text-gray-700">...</span>
-        )}
-
-        {totalPages > 1 && (
-          <button
-            onClick={() => handlePageChange(totalPages)}
-            className={`px-2 mx-1 border rounded ${
-              currentPage === totalPages
-                ? "bg-green-500 text-white"
-                : "bg-gray-100 text-gray-700"
-            }`}
-          >
-            {totalPages}
-          </button>
-        )}
-
+        <span className="mx-4">
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-2 mx-1 border rounded ${
+          className={`px-4 py-2 mx-2 border rounded-lg ${
             currentPage === totalPages
-              ? "bg-gray-300 text-gray-500"
-              : "bg-gray-100 text-gray-700"
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          &raquo;
+          Next &raquo;
         </button>
       </div>
     </div>

@@ -1,9 +1,18 @@
 import StoreRoom from "../models/storeModel.js";
 
 const view = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 7;
+ const skip = (page - 1) * limit;
   try {
-    const Store = await StoreRoom.find({});
-    res.json({ success: true, data: Store });
+     const totalStore = await StoreRoom.countDocuments();
+    const Store = await StoreRoom.find({}).skip(skip).limit(limit);
+     res.json({
+       totalStore,
+       totalPages: Math.ceil(totalStore / limit),
+       currentPage: page,
+       Store,
+     });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error" });

@@ -63,17 +63,51 @@ const deleteLandxHaari = async (req, res) => {
 };
 
 const getLandxHaari = async (req, res) => {
+  const fetchAll = req.query.all === "true"; // Check if the query parameter 'all' is set to true
+
   try {
-    const landxHaariList = await LandxHaari.find()
-      .populate({
-        path: "haariId",
-        select: "name",
-      })
-      .populate({
-        path: "land.land_id",
-        select: "name",
+    if (fetchAll) {
+      // If 'all' is true, fetch all LandxHaari records
+      const landxHaariList = await LandxHaari.find()
+        .populate({
+          path: "haariId",
+          select: "name",
+        })
+        .populate({
+          path: "land.land_id",
+          select: "name",
+        });
+
+      return res.json({
+        totalRecord: landxHaariList.length,
+        landxHaariList,
       });
-    res.json({ success: true, data: landxHaariList });
+    } else {
+      // Pagination logic
+      const page = parseInt(req.query.page) || 1;
+      const limit = 7;
+      const skip = (page - 1) * limit;
+
+      const totalRecord = await LandxHaari.countDocuments();
+      const landxHaariList = await LandxHaari.find()
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: "haariId",
+          select: "name",
+        })
+        .populate({
+          path: "land.land_id",
+          select: "name",
+        });
+
+      res.json({
+        totalRecord,
+        totalPages: Math.ceil(totalRecord / limit),
+        currentPage: page,
+        landxHaariList,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error fetching LandxHaari records." });

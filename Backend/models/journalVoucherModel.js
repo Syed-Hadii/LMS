@@ -13,27 +13,40 @@ const JournalVocherSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-   
-    account: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Chart_account",
-    },
-    sub_account: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Chart_account",
-      required: true,
-    },
-    bank_account: {
+
+    debit: {
+      account: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Bank_account",
+        ref: "Chart_account",
+        required: true,
+      },
+      sub_account: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Chart_account",
+        required: true,
+      },
+
+      debit_amount: {
+        type: Number,
+      },
+    },
+    credit: {
+      account: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Chart_account",
+        required: true,
+      },
+      sub_account: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Chart_account",
+        required: true,
+      },
+
+      credit_amount: {
+        type: Number,
+      },
     },
 
-    debit_amount: {
-      type: Number,
-    },
-    credit_amount: {
-      type: Number,
-    },
     memo: {
       type: String,
     },

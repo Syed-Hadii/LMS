@@ -13,8 +13,9 @@ const StockRecieved = () => {
 
   const fetchVendor = async () => {
     try {
-      const response = await axios.get(`${url}/supplier/get`);
-      setVendor(response.data.data);
+      const response = await axios.get(`${url}/supplier/get?all=true`);
+      console.log(response)
+      setVendor(response.data.supplier);
     } catch (error) {
       console.error("Error fetching vendor:", error);
     }
@@ -22,8 +23,9 @@ const StockRecieved = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(`${url}/items/view`);
-      setItems(response.data.data);
+      const response = await axios.get(`${url}/items/view?all=true`);
+      console.log(response);
+      setItems(response.data.ItemList);
     } catch (error) {
       console.error("Error fetching items:", error);
     }
@@ -31,8 +33,9 @@ const StockRecieved = () => {
 
   const fetchBank = async () => {
     try {
-      const response = await axios.get(`${url}/bank/get`);
-      setBank(response.data.data);
+      const response = await axios.get(`${url}/bank/get?all=true`);
+      console.log(response);
+      setBank(response.data.BankList);
     } catch (error) {
       console.error("Error fetching bank:", error);
     }
@@ -110,7 +113,7 @@ const StockRecieved = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl text-center font-bold mb-10 mt-5">
+      <h2 className="text-2xl text-center font-semibold mb-10 mt-5">
         Stock Received
       </h2>
       <div className="p-6 bg-gray-100 rounded-lg ">
@@ -123,7 +126,7 @@ const StockRecieved = () => {
           </label>
           <select
             id="vendor"
-            className="border border-gray-300 rounded-md p-2 w-full"
+            className="border border-gray-300 rounded-md p-2 w-full outline-none"
             value={selectedVendor}
             onChange={(e) => setSelectedVendor(e.target.value)}
             required
@@ -168,7 +171,7 @@ const StockRecieved = () => {
             <tbody className="divide-y divide-gray-300 text-sm">
               {appendedItems.map((row, index) => (
                 <tr key={index} className="hover:bg-gray-100 transition-colors">
-                  <td className="py-3 pl-4 pr-2">
+                  <td className="py-3 px-2">
                     <select
                       className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-36"
                       value={row.itemId}
@@ -201,24 +204,24 @@ const StockRecieved = () => {
                       onChange={(e) =>
                         handleRowChange(index, "stockToRecieve", e.target.value)
                       }
-                      className="border border-gray-300 text-center rounded-md p-2 w-[90px]"
+                      className="border border-gray-300 outline-none text-center rounded-md p-2 w-[90px]"
                       required
                     />
                   </td>
-                  <td className="py-3 px-2">
+                  <td className="py-3 px-2 ">
                     <input
                       type="number"
                       value={row.stockAmount}
                       onChange={(e) =>
                         handleRowChange(index, "stockAmount", e.target.value)
                       }
-                      className="border border-gray-300 text-center rounded-md p-2 w-36"
+                      className="border border-gray-300 outline-none text-center rounded-md p-2 w-28"
                       required
                     />
                   </td>
                   <td className="py-3 px-2">
                     <select
-                      className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-[135px] text-sm"
+                      className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-[130px] text-sm"
                       value={row.paymentMethod}
                       onChange={(e) =>
                         handleRowChange(index, "paymentMethod", e.target.value)
@@ -238,7 +241,7 @@ const StockRecieved = () => {
                       onChange={(e) =>
                         handleRowChange(index, "bankName", e.target.value)
                       }
-                      className="border border-gray-300 text-center rounded-md p-2 w-full md:w-36"
+                      className="border border-gray-300 outline-none text-center rounded-md p-2 w-full md:w-36"
                       disabled={row.paymentMethod !== "bank"}
                       placeholder="Enter Bank Name"
                     />
@@ -255,7 +258,7 @@ const StockRecieved = () => {
               ))}
             </tbody>
           </table>
-          <div className="flex justify-between">
+          <div className="flex gap-5">
             <button
               onClick={handleAddItem}
               className="bg-blue-500 text-white rounded-md px-4 py-2"

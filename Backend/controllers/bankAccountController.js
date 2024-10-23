@@ -10,6 +10,7 @@ const save = async (req, res) => {
       number,
       address,
       amount,
+      total_balance: amount,
     });
     await newBank.save();
     res.json({ success: true, message: "Bank added successfully." });
@@ -52,9 +53,21 @@ const update = async (req, res) => {
 };
 
 const view = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 6;
+  const skip = (page - 1) * limit;
   try {
-    const BankList = await Bank.find({});
-    res.json({ success: true, data: BankList });
+    const totalBanks = await Bank.countDocuments();
+    const BankList = await Bank.find({})
+      .skip(skip)
+      .limit(limit)
+      .populate("account_name");
+   res.json({
+     totalBanks,
+     totalPages: Math.ceil(totalBanks / limit),
+     currentPage: page,
+     BankList,
+   });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error fetching Bank records." });

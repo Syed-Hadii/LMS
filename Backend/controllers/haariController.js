@@ -44,13 +44,35 @@ const updateHaari = async (req, res) => {
 
 // Get all Haari records
 const getHaari = async (req, res) => {
-  try {
-    const haariList = await Haari.find({});
-    res.json({ success: true, data: haariList });
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error fetching Haari records." });
-  }
+  
+   const fetchAll = req.query.all === "true";
+
+   try {
+     if (fetchAll) {
+       const haari = await Haari.find({});
+       return res.json({
+         totalHaari: haari.length,
+         haari,
+       });
+     } else {
+       // Pagination logic
+       const page = parseInt(req.query.page) || 1;
+       const limit = 7;
+       const skip = (page - 1) * limit;
+
+       const totalHaari = await Haari.countDocuments();
+       const haari = await Haari.find({}).skip(skip).limit(limit);
+       res.json({
+         totalHaari,
+         totalPages: Math.ceil(totalHaari / limit),
+         currentPage: page,
+         haari,
+       });
+     }
+   } catch (error) {
+     console.log(error);
+     res.json({ success: false, message: "Error" });
+   }
 };
 
 export { addHaari, deleteHaari, updateHaari, getHaari };

@@ -17,17 +17,17 @@ import Item from "./Item";
 import StockConsume from "./StockConsume";
 import StockRecieved from "./StockRecieved";
 import ChartsofAccounts from "./ChartsofAccounts";
-import PaymentVoucher from "./PaymentVoucher";
-import RecieveVoucher from "./RecieveVoucher";
-import JournalVoucher from "./JournalVoucher";
+import RecieveForm from "./RecieveVoucherForm";
+import JournalForm from "./JournalVoucherForm";
+import PaymentForm from "./PaymentVoucherForm";
+import PaymentVoucherList from "./PaymentVoucherList";
+import RecieveVoucherList from "./RecieveVoucherList";
+import JournalVoucherList from "./JournalVoucherList";
+import CashAccount from "./CashAccount";
+import BankPayDetails from "./BankPayDetails";
+import VoucherModal from "../Components/RecieptVoucher";
 
 const Admin = () => {
-  
-  const [roles, setRoles] = useState([]);
-  const handleRolesChange = (newRoles) => {
-    setRoles(newRoles);
-  };
-
   return (
     <div className="admin-container flex bg-white text-slate-600 min-h-screen">
       <Sidebar />
@@ -36,11 +36,8 @@ const Admin = () => {
         <hr className="border-gray-300" />
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/user" element={<User roles={roles} />} />
-          <Route
-            path="/role"
-            element={<Role onRolesChange={handleRolesChange} />}
-          />
+          <Route path="/user" element={<User />} />
+          <Route path="/role" element={<Role />} />
           <Route path="/land" element={<Land />} />
           <Route path="/haari" element={<Haari />} />
           <Route path="/landxhaari" element={<LandxHaari />} />
@@ -51,9 +48,15 @@ const Admin = () => {
           <Route path="/stock_consume" element={<StockConsume />} />
           <Route path="/stock_recieve" element={<StockRecieved />} />
           <Route path="/chartsofaccounts" element={<ChartsofAccounts />} />
-          <Route path="/paymentvoucher" element={<PaymentVoucher />} />
-          <Route path="/recievevoucher" element={<RecieveVoucher />} />
-          <Route path="/journalvoucher" element={<JournalVoucher />} />
+          <Route path="/paymentvoucher" element={<PaymentVoucherList />} />
+          <Route path="/paymentvoucher/paymentform" element={<PaymentForm />} />
+          <Route path="/recievevoucher" element={<RecieveVoucherList />} />
+          <Route path="/recievevoucher/recieveform" element={<RecieveForm />} />
+          <Route path="/journalvoucher" element={<JournalVoucherList />} />
+          <Route path="/journalvoucher/journalform" element={<JournalForm />} />
+          <Route path="/cashaccount" element={<CashAccount />} />
+          <Route path="/bankpaydetails" element={<BankPayDetails />} />
+          <Route path="/voucher" element={<VoucherModal />} />
         </Routes>
       </div>
       <ToastContainer />

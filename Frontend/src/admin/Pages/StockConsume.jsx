@@ -15,8 +15,9 @@ const StockConsume = () => {
 
   const fetchHaari = async () => {
     try {
-      const response = await axios.get(`${url}/haari/gethaari`);
-      setHaari(response.data.data);
+      const response = await axios.get(`${url}/haari/gethaari?all=true`);
+      console.log(response)
+      setHaari(response.data.haari);
     } catch (error) {
       console.error("Error fetching haari:", error);
     }
@@ -24,8 +25,9 @@ const StockConsume = () => {
 
   const fetchLandNames = async () => {
     try {
-      const response = await axios.get(`${url}/land/list_land`);
-      setLandNames(response.data.data);
+      const response = await axios.get(`${url}/land/list_land?all=true`);
+      console.log(response);
+      setLandNames(response.data.land);
     } catch (error) {
       console.error("Error fetching land names:", error);
     }
@@ -33,8 +35,9 @@ const StockConsume = () => {
 
   const fetchLandxHaari = async () => {
     try {
-      const response = await axios.get(`${url}/landxhaari/get`);
-      setLandxHaari(response.data.data);
+      const response = await axios.get(`${url}/landxhaari/get?all=true`);
+      console.log(response);
+      setLandxHaari(response.data.landxHaariList);
     } catch (error) {
       console.error("Error fetching land names:", error);
     }
@@ -42,8 +45,9 @@ const StockConsume = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(`${url}/items/view`);
-      setItems(response.data.data);
+      const response = await axios.get(`${url}/items/view?all=true`);
+      console.log(response);
+      setItems(response.data.ItemList);
     } catch (error) {
       console.error("Error fetching items:", error);
     }
@@ -134,8 +138,8 @@ const StockConsume = () => {
   }, []);
 
   return (
-    <div>
-      <h2 className="text-2xl text-center font-bold mb-10 mt-5">
+    <div className="container mx-auto p-4">
+      <h2 className="text-2xl text-center font-semibold mb-10 mt-5">
         Stock Consume
       </h2>
       <div className="p-6 bg-gray-100 rounded-lg">
@@ -148,7 +152,7 @@ const StockConsume = () => {
           </label>
           <select
             id="haari"
-            className="border border-gray-300 rounded-md p-2 w-full"
+            className="border border-gray-300 rounded-md p-3 outline-none w-full"
             value={selectedHaari}
             onChange={handleHaariChange}
             required
@@ -162,7 +166,7 @@ const StockConsume = () => {
           </select>
         </div>
 
-        <table className="min-w-full bg-white border rounded-lg shadow-lg mb-6">
+        <table className="min-w-full bg-white border rounded-lg shadow-lg mb-6 px-4">
           <thead>
             <tr>
               <th className="py-3 px-5 text-left text-gray-600 font-semibold border-b border-gray-300">
@@ -177,16 +181,16 @@ const StockConsume = () => {
               <th className="py-3 px-4 text-center text-gray-600 font-semibold border-b border-gray-300">
                 Stock Consume
               </th>
-              <th className="py-3 px-9 text-left text-gray-600 font-semibold border-b border-gray-300">
+              <th className="py-3 px-7 text-left text-gray-600 font-semibold border-b border-gray-300">
                 Actions
               </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-300">
+          <tbody className="divide-y divide-gray-300 ">
             {appendedItems.map((row, index) => (
-              <tr key={index} className="hover:bg-gray-100 transition-colors">
-                <td className="py-3 px-4">
+              <tr key={index} className="hover:bg-gray-100 transition-colors ">
+                <td className="py-3 px-2">
                   <select
                     className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-72"
                     value={row.itemId}
@@ -203,7 +207,7 @@ const StockConsume = () => {
                     ))}
                   </select>
                 </td>
-                <td className="py-3 px-4">
+                <td className="py-3 px-2">
                   <select
                     className="border outline-none border-gray-300 rounded-md p-2 w-full md:w-72"
                     value={row.land_id}
@@ -220,7 +224,7 @@ const StockConsume = () => {
                     ))}
                   </select>
                 </td>
-                <td className="py-3 px-4">
+                <td className="py-3 px-2">
                   <input
                     type="number"
                     value={row.stockAvailable}
@@ -228,7 +232,7 @@ const StockConsume = () => {
                     className="border border-gray-300 rounded-md p-2 text-center w-full"
                   />
                 </td>
-                <td className="py-3 px-4">
+                <td className="py-3 px-2">
                   <input
                     type="number"
                     value={row.stockToConsume}
@@ -239,7 +243,7 @@ const StockConsume = () => {
                     required
                   />
                 </td>
-                <td className="py-3 px-4 text-center">
+                <td className="py-3 px-2 text-center">
                   <button
                     onClick={() => handleRemoveItem(index)}
                     className="text-red-600 px-4 py-1 rounded hover:bg-red-100"
@@ -252,7 +256,7 @@ const StockConsume = () => {
           </tbody>
         </table>
 
-        <div className="flex justify-between mb-4">
+        <div className="flex  gap-5 ">
           <button
             onClick={handleAddItem}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"

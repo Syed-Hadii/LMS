@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import validator from "validator";
-const PaymentVocherSchema = new mongoose.Schema(
+
+const PaymentVoucherSchema = new mongoose.Schema(
   {
     voucher_no: {
       type: Number,
@@ -36,9 +36,9 @@ const PaymentVocherSchema = new mongoose.Schema(
       type: Number,
       validate: {
         validator: function (v) {
-          return this.account_method === "Cash" ? v && v.length > 0 : true;
+          return this.payment_method === "Cash" ? !!v : true; // Fix this logic
         },
-        message: (props) => `Cash Amount`,
+        message: () => `Cash Amount is required for Cash payment method.`,
       },
     },
     cheque_number: {
@@ -46,27 +46,26 @@ const PaymentVocherSchema = new mongoose.Schema(
       required: function () {
         return this.payment_method === "Cheque";
       },
+      
     },
     bank_account: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Bank",
+      ref: "Bank_account",
       validate: {
         validator: function (v) {
-          return this.account_method === "Cheque" ||
-            this.account_method === "Bank Transfer"
-            ? v && v.length > 0
-            : true;
+          return this.payment_method === "Cheque" ||
+            this.payment_method === "Bank Transfer"
+            ? !!v
+            : true; // Fix the logic here too
         },
-        message: (props) => `Bank Number`,
+        message: () => `Bank account is required for Cheque or Bank Transfer.`,
       },
     },
     transaction_number: {
       type: String,
       validate: {
         validator: function (v) {
-          return this.payment_method === "Bank Transfer"
-            ? v && v.length > 0
-            : true;
+          return this.payment_method === "Bank Transfer" ? !!v : true;
         },
         message: () =>
           `Transaction Number is required for Bank Transfer payment method.`,
@@ -82,5 +81,6 @@ const PaymentVocherSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const PaymentVoucher = mongoose.model("Payment_voucher", PaymentVocherSchema);
+
+const PaymentVoucher = mongoose.model("Payment_voucher", PaymentVoucherSchema);
 export default PaymentVoucher;

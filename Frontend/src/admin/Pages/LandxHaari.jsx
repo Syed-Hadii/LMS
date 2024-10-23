@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { RotatingLines } from "react-loader-spinner";
 import "react-toastify/dist/ReactToastify.css";
 
 const LandxHaari = () => {
@@ -16,12 +17,13 @@ const LandxHaari = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [haari, setHaari] = useState([]);
   const [lands, setLands] = useState([]);
-  const [newData, setNewData] = useState([]);
   const [editLandId, setEditLandId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 5;
+  const recordsPerPage = 7;
+  const [totalPages, setTotalPages] = useState(1);
+  const [newData, setNewData] = useState([]);
   const [sortOrder, setSortOrder] = useState({ key: "", order: "asc" });
    const [newLand, setNewLand] = useState({
     haariId: "",
@@ -53,26 +55,36 @@ const LandxHaari = () => {
   const fetchData = async () => {
       setLoading(true);
     try {
-      const haariResponse = await axios.get(`${url}/haari/gethaari`);
-      setHaari(haariResponse.data.data);
-      const landResponse = await axios.get(`${url}/land/list_land`);
-      setLands(landResponse.data.data);
-      const landWithHaariResponse = await axios.get(`${url}/landxhaari/get`);
-      if (landWithHaariResponse.data && landWithHaariResponse.data.data) {
-        console.log(landWithHaariResponse.data.data);
-        setNewData(landWithHaariResponse.data.data);
+      const haariResponse = await axios.get(`${url}/haari/gethaari?all=true`);
+      console.log("haaris" ,haariResponse)
+      setHaari(haariResponse.data.haari);
+      console.log(haariResponse);
+      
+      const landResponse = await axios.get(`${url}/land/list_land?all=true`);
+      setLands(landResponse.data.land);
+      console.log(landResponse)
+      const response = await axios.get(
+        `${url}/landxhaari/get?page=${currentPage}&limit=${recordsPerPage}&search=${searchQuery}`
+      );
+      if (response) {
+        setNewData(response.data.landxHaariList);
+        console.log(response.landxHaariList);
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(response.data.currentPage);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-    }
+    } finally {
+        setLoading(false);
+      }
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
+ 
 
   useEffect(() => {
     console.log("LandWithHaari State:", newData);
-  }, [newData]);
+    console.log("Lands State:", lands);
+    console.log("Haari State:", haari);
+  }, [newData, lands, haari]);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -135,43 +147,70 @@ const LandxHaari = () => {
       ],
     });
   };
-
-  const handleDelete = async (haariId, landId) => {
-    try {
-      const response = await axios.post(`${url}/landxhaari/delete`, {
-        haariId,
-        Id: landId,
-      });
-      if (response.data.success) {
-        fetchData();
-        console.log("Delete successful:", response.data.message);
-      } else {
-        console.error("Delete failed:", response.data.message);
-      }
-    } catch (error) {
-      console.error("Error deleting item:", error);
-    }
+const handleDelete = async (haariId, landId) => {
+  const confirmDelete = () => {
+    toast.dismiss();
+    deleteVoucher(haariId, landId);
   };
 
-   const totalPages = Math.ceil(newData.length / recordsPerPage);
-   const paginatedLand = newData.slice(
-     (currentPage - 1) * recordsPerPage,
-     currentPage * recordsPerPage
-   );
+  toast.info(
+    <div>
+      Are you sure you want to delete?
+      <div className="flex justify-end mt-2">
+        <button
+          onClick={confirmDelete}
+          className="mr-2 px-2 py-1 bg-red-500 text-white rounded"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => toast.dismiss()}
+          className="px-2 py-1 bg-gray-400 text-white rounded"
+        >
+          No
+        </button>
+      </div>
+    </div>,
+    { autoClose: false }
+  );
+};
 
-
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
+  const deleteVoucher = async (haariId, landId) => {
+   setLoading(true);
+  try {
+    const response = await axios.post(`${url}/landxhaari/delete`, {
+      haariId,
+      Id: landId,
+    });
+    if (response.data.success) {
+      toast.success("Deleted successfully!");
+      fetchData();
+    } else {
+      toast.error("Error deleting ");
     }
-  };
+  } catch (error) {
+    console.error("Error deleting :", error);
+    toast.error("Error deleting ");
+  } finally {
+    setLoading(false);
+  }
+};
+ 
+
+   const handlePageChange = (page) => {
+     if (page > 0 && page <= totalPages) {
+       setCurrentPage(page);
+     }
+   };
   const handleSort = (key) => {
     setSortOrder((prevSortOrder) => ({
       key,
       order: prevSortOrder.order === "asc" ? "desc" : "asc",
     }));
   };
-
+ useEffect(() => {
+   fetchData();
+ }, [currentPage, searchQuery]);
   return (
     <div className="p-6">
       <h1 className="text-xl mb-5 font-semibold text-left">
@@ -217,7 +256,9 @@ const LandxHaari = () => {
       {showAddForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 text-center rounded shadow-lg w-[650px] h-auto mt-10">
-            <h1 className="text-lg font-semibold mb-5">Add New LandxHaari</h1>
+            <h1 className="text-lg font-semibold mb-5">
+              Assign New Land to Haari
+            </h1>
             <hr className="mb-6 border-gray-400" />
             <form className="space-y-6" onSubmit={handleAdd}>
               <div className="flex gap-4">
@@ -413,37 +454,38 @@ const LandxHaari = () => {
           </div>
         </div>
       )}
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <RotatingLines width="50" strokeColor="#067528" />
+        </div>
+      ) : (
+        <div className="mt-4 grid grid-cols-1 gap-4">
+          <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+            {/* Header Row */}
+            <div className="grid grid-cols-7 bg-[#e0f2e9] text-xs md:text-base">
+              {[
+                "Haari Name",
+                "Land Name",
+                "Crop Name",
+                "Start Date",
+                "End Date",
+                "Details",
+                "Actions",
+              ].map((header) => (
+                <div
+                  key={header}
+                  className="py-3 text-center text-gray-800 font-semibold"
+                >
+                  {header}
+                </div>
+              ))}
+            </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4">
-        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-          <div className="grid grid-cols-7 bg-[#e0f2e9] text-xs md:text-base text-wrap">
-            {/* Header */}
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Haari Name
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Land Name
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Crop Name
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Start Date
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              End Date
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Details
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Actions
-            </div>
-          </div>
-          {Array.isArray(paginatedLand) && paginatedLand.length > 0 ? (
-            paginatedLand.map((haariItem) =>
-              Array.isArray(haariItem.land) && haariItem.land.length > 0
-                ? haariItem.land.map((land) => (
+            {/* Data Rows */}
+            {Array.isArray(newData) && newData.length > 0 ? (
+              newData.map((haariItem) =>
+                Array.isArray(haariItem.land) && haariItem.land.length > 0 ? (
+                  haariItem.land.map((land) => (
                     <div
                       key={`${haariItem.haariId?._id}-${land._id}`}
                       className="grid grid-cols-7 px-2 gap-2 border-b text-gray-700 md:text-sm text-[10px] hover:bg-gray-100"
@@ -461,9 +503,9 @@ const LandxHaari = () => {
                             }
                             className="border rounded px-2 w-full"
                           >
-                            {haari.map((haari) => (
-                              <option key={haari._id} value={haari._id}>
-                                {haari.name}
+                            {haari.map((h) => (
+                              <option key={h._id} value={h._id}>
+                                {h.name}
                               </option>
                             ))}
                           </select>
@@ -471,6 +513,7 @@ const LandxHaari = () => {
                           haariItem.haariId?.name || "N/A"
                         )}
                       </div>
+
                       <div className="py-3 text-center max-w-xs">
                         {editLandId === land._id ? (
                           <select
@@ -499,6 +542,7 @@ const LandxHaari = () => {
                           land.land_id?.name || "N/A"
                         )}
                       </div>
+
                       <div className="py-3 text-center max-w-xs">
                         {editLandId === land._id ? (
                           <input
@@ -522,10 +566,11 @@ const LandxHaari = () => {
                           land.crop_name || "N/A"
                         )}
                       </div>
+
                       <div className="py-3 text-center max-w-xs">
                         {editLandId === land._id ? (
                           <input
-                            type="text"
+                            type="date"
                             name="startDate"
                             value={newLand.land[0]?.start_date || ""}
                             onChange={(e) =>
@@ -545,10 +590,11 @@ const LandxHaari = () => {
                           land.start_date || "N/A"
                         )}
                       </div>
+
                       <div className="py-3 text-center max-w-xs">
                         {editLandId === land._id ? (
                           <input
-                            type="text"
+                            type="date"
                             name="endDate"
                             value={newLand.land[0]?.end_date || ""}
                             onChange={(e) =>
@@ -568,6 +614,7 @@ const LandxHaari = () => {
                           land.end_date || "N/A"
                         )}
                       </div>
+
                       <div className="py-3 text-center max-w-xs">
                         {editLandId === land._id ? (
                           <input
@@ -591,7 +638,8 @@ const LandxHaari = () => {
                           land.details || "N/A"
                         )}
                       </div>
-                      <div className="py-3 text-center  flex justify-center">
+
+                      <div className="py-3 text-center flex justify-center">
                         {editLandId === land._id ? (
                           <>
                             <button
@@ -612,20 +660,12 @@ const LandxHaari = () => {
                         ) : (
                           <>
                             <button
-                              className="text-green-600 py-1 px-1 md:px-2 rounded-md flex items-center gap-2 "
+                              className="text-green-600 py-1 px-1 md:px-2 rounded-md flex items-center gap-2"
                               onClick={() => {
                                 setEditLandId(land._id);
                                 setNewLand({
                                   haariId: haariItem.haariId._id,
-                                  land: [
-                                    {
-                                      land_id: land.land_id._id,
-                                      crop_name: land.crop_name,
-                                      start_date: land.start_date,
-                                      end_date: land.end_date,
-                                      details: land.details,
-                                    },
-                                  ],
+                                  land: [{ ...land }],
                                 });
                               }}
                             >
@@ -644,37 +684,46 @@ const LandxHaari = () => {
                       </div>
                     </div>
                   ))
-                : null
-            )
-          ) : (
-            <p className="text-center">Loading...</p>
-          )}
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No land data available.
+                  </div>
+                )
+              )
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                No haari data available.
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex justify-end items-center">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-2  mx-2 border rounded-lg ${
+          className={`px-4 py-2 mx-2 border rounded-lg ${
             currentPage === 1
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          &laquo;
+          &laquo; Previous
         </button>
-
+        <span className="mx-4">
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-2 mx-2 border rounded-lg ${
+          className={`px-4 py-2 mx-2 border rounded-lg ${
             currentPage === totalPages
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          &raquo;
+          Next &raquo;
         </button>
       </div>
     </div>

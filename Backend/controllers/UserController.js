@@ -1,4 +1,4 @@
-import User from "../models/UserModel.js";
+import User from "../models/userModel.js";
 import Role from "../models/roleModel.js";
 import validator from "validator";
 import bcrypt from "bcrypt";
@@ -76,16 +76,28 @@ const save_role = async (req, resp) => {
   resp.json({ success: true, message: "Role Inserted" });
 }
 const getRole = async (req, res) => {
-  try {
-    const role = await Role.find();
-    res.json(role);
-  } 
-  catch (error) {
-    console.log(error);
+  const page = parseInt(req.query.page) || 1;
+  const limit = 7;
+  const skip = (page - 1) * limit;
 
+  try {
+
+    const totalRoles = await Role.countDocuments();
+
+    const roles = await Role.find().skip(skip).limit(limit);
+
+    res.json({
+      totalRoles,
+      totalPages: Math.ceil(totalRoles / limit),
+      currentPage: page,
+      roles,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
   }
-  
-}
+};
+
 const delete_role = async (req, res) => {
   const check_role = await User.findOne({ role: req.body.id });
   if (check_role) {

@@ -33,5 +33,64 @@ body {
   background-color: #f0f5f9;
 }
 
-/* Adjust other element styles as needed */
+.transition-max-height {
+  transition: max-height 0.5s ease-in-out;
+}
+
+.max-h-0 {
+  max-height: 0; /* Hidden state */
+}
+
+.max-h-40 {
+  max-height: 10rem; /* Adjust according to your needs */
+}
+/* Add this CSS to your stylesheet */
+.sidebar {
+  overflow-y: auto;
+  height: 100vh; /* Ensure it takes the full height of the viewport */
+}
+
+/* Scrollbar styling for .sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 5px; /* Width of the scrollbar */
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background color of the scrollbar track */
+  border-radius: 10px; /* Rounded corners for the track */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #c4c4c4; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #9e9e9e; /* Darker shade on hover */
+}
+
+.main-content {
+  overflow-y: auto;
+  height: 100vh; /* Ensure it takes the full height of the viewport */
+}
+
+/* Scrollbar styling for .main-content */
+.main-content::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background color of the scrollbar track */
+  border-radius: 10px; /* Rounded corners for the track */
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #aeafae; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #a2a3a2; /* Darker shade on hover */
+}
+
 

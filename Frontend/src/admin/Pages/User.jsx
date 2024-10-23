@@ -57,22 +57,50 @@ const User = () => {
     fetchUserList();
   }, []);
 
-  const handleRemove = async (userId) => {
-    try {
-      const response = await axios.post(`${url}/adduser/deleteuser`, {
-        id: userId,
-      });
-      if (response.data.success) {
-        console.log("User Removed successfully");
-        fetchUserList();
-      } else {
-        console.log("Error removing user");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  
+const handleRemove = async (userId) => {
+  toast.info(
+    <div>
+      Are you sure you want to delete this user?
+      <div className="flex justify-end mt-2">
+        <button
+          onClick={() => deleteVoucher(userId)}
+          className="mr-2 px-2 py-1 bg-red-500 text-white rounded"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => toast.dismiss()}
+          className="px-2 py-1 bg-gray-400 text-white rounded"
+        >
+          No
+        </button>
+      </div>
+    </div>,
+    { autoClose: false }
+  );
+};
 
+const deleteVoucher = async (userId) => {
+  //  setLoading(true);
+  try {
+    const response = await axios.post(`${url}/adduser/deleteuser`, {
+      id: userId,
+    });
+    if (response.data.success) {
+      toast.dismiss();
+      toast.success("User deleted successfully!");
+      fetchUserList();
+    } else {
+      toast.error("Error deleting user");
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    toast.error("Error deleting user");
+  } finally {
+    //  setLoading(false);
+  }
+};
   const handleEditClick = (user) => {
     setEditingUserId(user._id);
     setEditableData(user);
@@ -245,19 +273,20 @@ const User = () => {
         </div>
       )}
 
-      <table className="min-w-full bg-white border border-gray-300 rounded-lg">
-        <thead className=" text-slate-600">
-          <tr className="bg-gray-200">
-            <th className="py-3 px-4 text-left">Name</th>
-            <th className="py-3 px-4 text-left">Email</th>
-            <th className="py-3 px-4 text-left">Role</th>
-            <th className="py-3 px-4 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div className="min-w-full bg-white border border-gray-300 rounded-lg">
+        <div className="grid grid-cols-4 bg-[#e0f2e9]  text-gray-800 font-semibold cursor-pointer py-3">
+          <div className="px-4 text-left">Name</div>
+          <div className="px-4 text-left">Email</div>
+          <div className="px-4 text-left">Role</div>
+          <div className="px-4 text-left">Actions</div>
+        </div>
+        <div className="divide-y divide-gray-300">
           {filteredUsers.map((user) => (
-            <tr key={user._id} className="border-b hover:bg-gray-100">
-              <td className="py-3 px-4">
+            <div
+              key={user._id}
+              className="grid grid-cols-4 py-3 hover:bg-gray-100"
+            >
+              <div className="px-4">
                 {editingUserId === user._id ? (
                   <input
                     type="text"
@@ -269,8 +298,8 @@ const User = () => {
                 ) : (
                   user.full_name
                 )}
-              </td>
-              <td className="py-3 px-4">
+              </div>
+              <div className="px-4">
                 {editingUserId === user._id ? (
                   <input
                     type="text"
@@ -282,8 +311,8 @@ const User = () => {
                 ) : (
                   user.email
                 )}
-              </td>
-              <td className="py-3 px-4">
+              </div>
+              <div className="px-4">
                 {editingUserId === user._id ? (
                   <select
                     name="role"
@@ -300,8 +329,8 @@ const User = () => {
                 ) : (
                   user.role?.role
                 )}
-              </td>
-              <td className="py-3 px-4">
+              </div>
+              <div className="px-4">
                 {editingUserId === user._id ? (
                   <div className="flex gap-2">
                     <button
@@ -333,11 +362,11 @@ const User = () => {
                     </button>
                   </div>
                 )}
-              </td>
-            </tr>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
     </div>
   );
 };

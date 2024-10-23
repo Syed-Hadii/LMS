@@ -3,17 +3,20 @@ import axios from "axios";
 import { FaPlus, FaSave, FaTimes, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RotatingLines } from "react-loader-spinner";
 
 const Role = () => {
   const url = "http://localhost:3002";
-  const [roles, setRoles] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newRole, setNewRole] = useState("");
   const [editingRoleId, setEditingRoleId] = useState(null);
   const [editableRole, setEditableRole] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-   const [currentPage, setCurrentPage] = useState(1);
-   const recordsPerPage = 6;
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 6;
+  const [totalPages, setTotalPages] = useState(1);
+  const [roles, setRoles] = useState([]);
    const [sortConfig, setSortConfig] = useState({
      key: "name",
      direction: "asc",
@@ -41,13 +44,24 @@ const Role = () => {
 
 
   const fetchRoles = async () => {
+    setLoading(true); 
     try {
-      const response = await axios.get(`${url}/adduser/getrole`);
-      setRoles(response.data);
+      const response = await axios.get(
+        `${url}/adduser/getrole?page=${currentPage}&limit=${recordsPerPage}&search=${searchQuery}`
+      );
+      setRoles(response.data.roles); // Set roles from response
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(response.data.currentPage); // Set total pages
     } catch (error) {
       console.error("Error fetching roles:", error);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
+
+  useEffect(() => {
+    fetchRoles();
+  }, [currentPage, searchQuery]);
 
   useEffect(() => {
     fetchRoles();
@@ -69,19 +83,50 @@ const Role = () => {
       console.error("Error adding role:", error);
     }
   };
+ const handleRemoveRole = async (roleId) => {
+   toast.info(
+     <div>
+       Are you sure you want to delete this role?
+       <div className="flex justify-end mt-2">
+         <button
+           onClick={() => deleteVoucher(roleId)}
+           className="mr-2 px-2 py-1 bg-red-500 text-white rounded"
+         >
+           Yes
+         </button>
+         <button
+           onClick={() => toast.dismiss()}
+           className="px-2 py-1 bg-gray-400 text-white rounded"
+         >
+           No
+         </button>
+       </div>
+     </div>,
+     { autoClose: false }
+   );
+ };
 
-  const handleRemoveRole = async (roleId) => {
-    try {
-      const response = await axios.post(`${url}/adduser/deleterole`, {
-        id: roleId,
-      });
-      if (response.data.success) {
-        fetchRoles(); 
-      }
-    } catch (error) {
-      console.log("Error removing role:", error);
-    }
-  };
+ const deleteVoucher = async (roleId) => {
+    setLoading(true);
+   try {
+     const response = await axios.post(`${url}/adduser/deleterole`, {
+       id: roleId,
+     });
+     if (response.data.success) {
+       toast.dismiss();
+       toast.success("Role deleted successfully!");
+       fetchRoles();
+     } else {
+       toast.error("Error deleting role");
+     }
+   } catch (error) {
+     console.error("Error deleting role:", error);
+     toast.error("Error deleting role");
+   } finally {
+      setLoading(false);
+   }
+ };
+ 
 
   const handleEditClick = (role) => {
     setEditingRoleId(role._id);
@@ -108,17 +153,13 @@ const Role = () => {
     }
   };
   
-    const totalPages = Math.ceil(filteredRole.length / recordsPerPage);
-    const paginatedRole = filteredRole.slice(
-      (currentPage - 1) * recordsPerPage,
-      currentPage * recordsPerPage
-    );
+    
 
-    const handlePageChange = (page) => {
-      if (page > 0 && page <= totalPages) {
-        setCurrentPage(page);
-      }
-    };
+ const handlePageChange = (page) => {
+   if (page > 0 && page <= totalPages) {
+     setCurrentPage(page);
+   }
+ };
 
   const handleCancelEdit = () => {
     setEditingRoleId(null);
@@ -185,111 +226,117 @@ const Role = () => {
           </div>
         </div>
       )}
-
-      <div className="mt-4 grid grid-cols-1 gap-4">
-        <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-          <div className="grid grid-cols-3 bg-[#e0f2e9]">
-            <div
-              className="py-3 text-center text-gray-800 font-semibold cursor-pointer"
-              onClick={() => handleSort("role")}
-            >
-              Role{" "}
-              {sortConfig.key === "role" ? (
-                <span className="inline-block ml-2 -mt-1 align-middle text-xs">
-                  {sortConfig.direction === "asc" ? "▲" : "▼"}
-                </span>
-              ) : (
-                ""
-              )}
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Permission
-            </div>
-            <div className="py-3 text-center text-gray-800 font-semibold">
-              Actions
-            </div>
-          </div>
-          {paginatedRole.map((role) => (
-            <div
-              key={role._id}
-              className="grid grid-cols-3 gap-2 border-b text-gray-700 text-sm hover:bg-gray-100"
-            >
-              <div className="py-3 text-center max-w-xs">
-                {editingRoleId === role._id ? (
-                  <input
-                    type="text"
-                    value={editableRole}
-                    onChange={handleEditChange}
-                    className="border rounded px-2 w-full"
-                  />
-                ) : (
-                  role.role
-                )}
-              </div>
-              <div className="py-3 text-center max-w-xs">
-                Permission Details
-              </div>
-              <div className="py-3 text-center  flex justify-center">
-                {editingRoleId === role._id ? (
-                  <>
-                    <button
-                      className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
-                      onClick={handleSaveEdit}
-                    >
-                      <FaSave className="text-sm" />
-                    </button>
-                    <button
-                      className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
-                      onClick={handleCancelEdit}
-                    >
-                      <FaTimes className="text-sm" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
-                      onClick={() => handleEditClick(role)}
-                    >
-                      <FaEdit className="text-sm" />
-                    </button>
-                    <button
-                      className="text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
-                      onClick={() => handleRemoveRole(role._id)}
-                    >
-                      <FaTrash className="text-sm" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <RotatingLines width="50" strokeColor="#067528" />
         </div>
-      </div>
-
-      <div className="mt-4 flex justify-end">
+      ) : (
+        <div className="mt-4 grid grid-cols-1 gap-4">
+          <div className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+            <div className="grid grid-cols-3 bg-[#e0f2e9]">
+              <div
+                className="py-3 text-center text-gray-800 font-semibold cursor-pointer"
+                onClick={() => handleSort("role")}
+              >
+                Role{" "}
+                {sortConfig.key === "role" ? (
+                  <span className="inline-block ml-2 -mt-1 align-middle text-xs">
+                    {sortConfig.direction === "asc" ? "▲" : "▼"}
+                  </span>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="py-3 text-center text-gray-800 font-semibold">
+                Permission
+              </div>
+              <div className="py-3 text-center text-gray-800 font-semibold">
+                Actions
+              </div>
+            </div>
+            {filteredRole.map((role) => (
+              <div
+                key={role._id}
+                className="grid grid-cols-3 gap-2 border-b text-gray-700 text-sm hover:bg-gray-100"
+              >
+                <div className="py-3 text-center max-w-xs">
+                  {editingRoleId === role._id ? (
+                    <input
+                      type="text"
+                      value={editableRole}
+                      onChange={handleEditChange}
+                      className="border rounded px-2 w-full"
+                    />
+                  ) : (
+                    role.role
+                  )}
+                </div>
+                <div className="py-3 text-center max-w-xs">
+                  Permission Details
+                </div>
+                <div className="py-3 text-center  flex justify-center">
+                  {editingRoleId === role._id ? (
+                    <>
+                      <button
+                        className="bg-green-500 text-white py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                        onClick={handleSaveEdit}
+                      >
+                        <FaSave className="text-sm" />
+                      </button>
+                      <button
+                        className="bg-gray-500 text-white py-1 px-2 rounded-md flex items-center gap-2"
+                        onClick={handleCancelEdit}
+                      >
+                        <FaTimes className="text-sm" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="text-green-600 py-1 px-2 rounded-md flex items-center gap-2 mr-2"
+                        onClick={() => handleEditClick(role)}
+                      >
+                        <FaEdit className="text-sm" />
+                      </button>
+                      <button
+                        className="text-red-500 py-1 px-2 rounded-md flex items-center gap-2"
+                        onClick={() => handleRemoveRole(role._id)}
+                      >
+                        <FaTrash className="text-sm" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="mt-4 flex justify-end items-center">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-2  mx-2 border rounded-lg ${
+          className={`px-4 py-2 mx-2 border rounded-lg ${
             currentPage === 1
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          &laquo;
+          &laquo; Previous
         </button>
-
+        <span className="mx-4">
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-2 mx-2 border rounded-lg ${
+          className={`px-4 py-2 mx-2 border rounded-lg ${
             currentPage === totalPages
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          &raquo;
+          Next &raquo;
         </button>
       </div>
     </div>

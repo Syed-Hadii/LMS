@@ -21,11 +21,7 @@ const ItemSchema = new mongoose.Schema({
   pkg_amount: {
     type: Number,
     required: true,
-  },
-  stock: {
-    type: Number,
-    required: true,
-  },
+  }
 });
 const Item = mongoose.model("Item", ItemSchema);
 export default Item;

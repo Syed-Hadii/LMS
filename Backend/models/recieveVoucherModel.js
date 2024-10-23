@@ -49,15 +49,15 @@ const recieveVocherSchema = new mongoose.Schema(
     },
     bank_account: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Bank",
+      ref: "Bank_account",
       validate: {
         validator: function (v) {
-          return this.account_method === "Cheque" ||
-            this.account_method === "Bank Transfer"
-            ? v && v.length > 0
-            : true;
+          return this.payment_method === "Cheque" ||
+            this.payment_method === "Bank Transfer"
+            ? !!v
+            : true; // Fix the logic here too
         },
-        message: (props) => `Bank Number`,
+        message: () => `Bank account is required for Cheque or Bank Transfer.`,
       },
     },
     transaction_number: {

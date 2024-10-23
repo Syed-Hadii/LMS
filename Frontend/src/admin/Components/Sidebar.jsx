@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useMatch } from "react-router-dom";
 import logo_light from "../assets/logo-light.png";
 import {
-  FaUniversity,
   FaDesktop,
   FaUser,
   FaBox,
@@ -73,36 +72,69 @@ const Sidebar = () => {
         >
           {/* Dashboard */}
           <NavLink className={linkClasses} to="dashboard">
-            <FaDesktop className="text-[#067528] w-4 h-4" />
-            <span className="text-black text-sm">Dashboards</span>
+            {({ isActive }) => (
+              <>
+                <FaDesktop
+                  className={`w-4 h-4 text-[#067528] ${
+                    isActive ? "animate-pulse" : ""
+                  } group-hover:text-green-500 transition-colors duration-300`}
+                />
+                <span className="text-black text-sm">Dashboards</span>
+              </>
+            )}
           </NavLink>
 
           {/* Users */}
           <NavLink className={linkClasses} to="user">
-            <FaUserCircle className="text-[#067528] w-4 h-4" />
-            <span className="text-black text-sm">Users</span>
+            {({ isActive }) => (
+              <>
+                <FaUserCircle
+                  className={`text-[#067528] w-4 h-4 ${
+                    isActive ? "animate-pulse" : ""
+                  }`}
+                />
+                <span className="text-black text-sm">Users</span>
+              </>
+            )}
           </NavLink>
 
           {/* Role */}
           <NavLink className={linkClasses} to="role">
-            <FaUserShield className="text-[#067528] w-4 h-4" />
-            <span className="text-black text-sm">Role</span>
+            {({ isActive }) => (
+              <>
+                <FaUserShield
+                  className={`text-[#067528] w-4 h-4 ${
+                    isActive ? "animate-pulse" : ""
+                  }`}
+                />
+                <span className="text-black text-sm">Role</span>
+              </>
+            )}
           </NavLink>
 
           {/* Land */}
           <NavLink className={linkClasses} to="land">
-            <FaMapMarkedAlt className="text-[#067528] w-4 h-4" />
-            <span className="text-black text-sm">Land</span>
+            {({ isActive }) => (
+              <>
+                <FaMapMarkedAlt
+                  className={`text-[#067528] w-4 h-4 ${
+                    isActive ? "animate-pulse" : ""
+                  }`}
+                />
+                <span className="text-black text-sm">Land</span>
+              </>
+            )}
           </NavLink>
 
           {/* Haari (Dropdown) */}
+
           <div className="relative">
             <div
               className={linkClasses({ isActive: false })}
               onClick={() => handleDropdownToggle("haari")}
             >
               <div className="flex items-center justify-between w-full cursor-pointer">
-                <div className="flex items-center gap-1 text-[#067528]">
+                <div className="flex items-center gap-1.5 text-[#067528]">
                   <FaUser className="text-[#067528] w-4 h-4" />
                   <span className="text-black text-sm">Haari</span>
                 </div>
@@ -130,31 +162,81 @@ const Sidebar = () => {
               </div>
             )}
           </div>
-
           {/* Vendors */}
           <NavLink className={linkClasses} to="supplier">
-            <FaPeopleCarry className="text-[#067528] w-4 h-4" />
-            <span className=" text-black text-sm">Vendors</span>
+            {({ isActive }) => (
+              <>
+                <FaPeopleCarry
+                  className={`text-[#067528] w-4 h-4 ${
+                    isActive ? "animate-pulse" : ""
+                  }`}
+                />
+                <span className=" text-black text-sm">Vendors</span>
+              </>
+            )}
           </NavLink>
 
-          {/* Bank Accounts */}
-          <NavLink className={linkClasses} to="bankaccount">
-            <FaUniversity className="text-[#067528] w-4 h-4" />
-            <span className="text-black text-sm text-nowrap">
-              Bank Accounts
-            </span>
-          </NavLink>
+          <div className="relative">
+            <div
+              className={linkClasses({ isActive: false })}
+              onClick={() => handleDropdownToggle("account")}
+            >
+              <div className="flex items-center justify-between w-full cursor-pointer">
+                <div className="flex items-center gap-2 text-[#067528]">
+                  <FaUser className="text-[#067528] w-4 h-4" />
+                  <span className="text-black text-sm">Accounts</span>
+                </div>
+                <span
+                  className={`transition-transform ml-1 text-black duration-300 ${
+                    openDropdown === "haari" ? "rotate-180" : "rotate-0"
+                  }`}
+                >
+                  ▼
+                </span>
+              </div>
+            </div>
+            {isSidebarOpen && (
+              <div
+                className={`flex flex-col ml-6 text-center mt-1 gap-1 overflow-hidden transition-max-height duration-300 ease-in-out ${
+                  openDropdown === "account" ? "max-h-40" : "max-h-0"
+                }`}
+              >
+                <NavLink className={linkClasses} to="bankpaydetails">
+                  <span className="text-black md:text-xs">Bank Account</span>
+                </NavLink>
+                <NavLink className={linkClasses} to="cashaccount">
+                  <span className="text-black md:text-xs">Cash Account</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
 
           {/* Store */}
           <NavLink className={linkClasses} to="store">
-            <FaStore className="text-[#067528] w-4 h-4" />
-            <span className=" text-black text-sm">Store</span>
+            {({ isActive }) => (
+              <>
+                <FaStore
+                  className={`text-[#067528] w-4 h-4 ${
+                    isActive ? "animate-pulse" : ""
+                  }`}
+                />
+                <span className=" text-black text-sm">Store</span>
+              </>
+            )}
           </NavLink>
 
           {/* Items */}
           <NavLink className={linkClasses} to="item">
-            <FaBox className="text-[#067528] w-4 h-4" />
-            <span className=" text-black text-sm">Items</span>
+            {({ isActive }) => (
+              <>
+                <FaBox
+                  className={`text-[#067528] w-4 h-4 ${
+                    isActive ? "animate-pulse" : ""
+                  }`}
+                />
+                <span className=" text-black text-sm">Items</span>
+              </>
+            )}
           </NavLink>
 
           {/* Stock (Dropdown) */}
@@ -192,7 +274,6 @@ const Sidebar = () => {
               </div>
             )}
           </div>
-
           <div className="relative">
             <div
               className={linkClasses({ isActive: false })}
@@ -225,16 +306,23 @@ const Sidebar = () => {
                   <span className="text-black text-xs">Payment Voucher</span>
                 </NavLink>
                 <NavLink className={linkClasses} to="recievevoucher">
-                  <span className="text-black text-xs">Recieve Voucher</span>
+                  <span className="text-black text-xs">Reciept Voucher</span>
                 </NavLink>
               </div>
             )}
           </div>
 
-        
           <NavLink className={linkClasses} to="chartsofaccounts">
-            <FaChartLine className="text-[#067528] w-4 h-4" />
-            <span className="text-black text-sm">Charts of Account</span>
+            {({ isActive }) => (
+              <>
+                <FaChartLine
+                  className={`text-[#067528] w-4 h-4 ${
+                    isActive ? "animate-pulse" : ""
+                  }`}
+                />
+                <span className="text-black text-sm -ml-1">Charts of Account</span>
+              </>
+            )}
           </NavLink>
         </div>
       </div>

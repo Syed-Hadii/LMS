@@ -1,9 +1,31 @@
 import Land from "../models/landModel.js";
 
 const view_land = async (req, res) => {
+  const fetchAll = req.query.all === "true"; 
+
   try {
-    const land = await Land.find({});
-    res.json({ success: true, data: land });
+    if (fetchAll) {
+      
+      const land = await Land.find({});
+      return res.json({
+        totalLands: land.length,
+        land,
+      });
+    } else {
+      // Pagination logic
+      const page = parseInt(req.query.page) || 1;
+      const limit = 7;
+      const skip = (page - 1) * limit;
+
+      const totalLands = await Land.countDocuments();
+      const land = await Land.find({}).skip(skip).limit(limit);
+      res.json({
+        totalLands,
+        totalPages: Math.ceil(totalLands / limit),
+        currentPage: page,
+        land,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error" });

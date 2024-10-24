@@ -1,31 +1,36 @@
 import LandxHaari from "../models/landxhaariModel.js";
+import Land from "../models/landModel.js";
+import Haari from "../models/haariModel.js";
+import Supplier from "../models/supplierModel.js";
 
 const addLandxHaari = async (req, res) => {
   const { haariId, landId } = req.body;
 
   try {
-    const newLandxHaari = new LandxHaari({
-      haariId,
-      land: landId.map((data) => ({
-        land_id: data.land_id,
-        crop_name: data.crop_name,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        details: data.details,
-      })),
+    // Check if the land is already assigned to any haari
+    const existingAssignment = await LandxHaari.findOne({
+      "land.land_id": landId[0].land_id,
     });
+
+    if (existingAssignment) {
+      return res.status(400).json({
+        success: false,
+        message: "This land is already assigned to another haari.",
+      });
+    }
+
     const hari = await LandxHaari.findOne({ haariId });
 
     if (hari) {
+      // Check if the haari already has this land assigned
       const existingLand = hari.land.find((land) =>
-        land._id.equals(landId[0].land_id)
+        land.land_id.equals(landId[0].land_id)
       );
+
       if (existingLand) {
+        // Update the existing land's details
         await LandxHaari.updateOne(
-          {
-            haariId,
-            "land._id": landId[0].land_id,
-          },
+          { haariId, "land.land_id": landId[0].land_id },
           {
             $set: {
               "land.$.crop_name": landId[0].crop_name,
@@ -36,20 +41,34 @@ const addLandxHaari = async (req, res) => {
           }
         );
       } else {
-        await LandxHaari.updateOne(
-          { haariId },
-          { $push: { land: newLandxHaari.land } }
-        );
+        // Add a new land to this haari's record
+        await LandxHaari.updateOne({ haariId }, { $push: { land: landId } });
       }
     } else {
+      // Create a new LandxHaari record for this haari
+      const newLandxHaari = new LandxHaari({
+        haariId,
+        land: landId.map((data) => ({
+          land_id: data.land_id,
+          crop_name: data.crop_name,
+          start_date: data.start_date,
+          end_date: data.end_date,
+          details: data.details,
+        })),
+      });
+
       await newLandxHaari.save();
     }
+
     res.json({ success: true, message: "LandxHaari added successfully." });
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: "Error adding LandxHaari." });
+    res
+      .status(500)
+      .json({ success: false, message: "Error adding LandxHaari." });
   }
 };
+
 
 const deleteLandxHaari = async (req, res) => {
   const { haariId, Id } = req.body;
@@ -113,5 +132,17 @@ const getLandxHaari = async (req, res) => {
     res.json({ success: false, message: "Error fetching LandxHaari records." });
   }
 };
+const totalSummary = async (req, res) => {
+  try {
+    const totalLands = await Land.countDocuments(); 
+    const totalHaaris = await Haari.countDocuments(); 
+    const totalSupplier = await Supplier.countDocuments(); 
 
-export { addLandxHaari, deleteLandxHaari, getLandxHaari };
+    res.json({ totalLands, totalHaaris, totalSupplier });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+}
+
+export { addLandxHaari, deleteLandxHaari, getLandxHaari, totalSummary };

@@ -31,23 +31,23 @@ const ChartsofAccounts = () => {
   const recordsPerPage = 6;
   const [totalPages, setTotalPages] = useState(1);
   const [accountList, setAccountList] = useState([]);
-  const [allAccounts, setAllAccounts] = useState([])
+  const [allAccounts, setAllAccounts] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
-  
+  const [totalDebit, setTotalDebit] = useState(0);
+  const [totalCredit, setTotalCredit] = useState(0);
+
   const fetchAllAccount = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await axios.get(
-        `${url}/chartaccount/get?all=true`
-      );
+      const response = await axios.get(`${url}/chartaccount/get?all=true`);
       if (response) {
         setAllAccounts(response.data.chartAccounts);
         console.log("All Accounts:", response);
-         const total = response.data.chartAccounts.reduce((acc, account) => {
-           return acc + Number(account.total_balance || 0);
-         }, 0);
+        const total = response.data.chartAccounts.reduce((acc, account) => {
+          return acc + Number(account.total_balance || 0);
+        }, 0);
 
-         setTotalBalance(total);
+        setTotalBalance(total);
       }
     } catch (error) {
       console.log("Error fetching all accounts:", error);
@@ -55,10 +55,9 @@ const ChartsofAccounts = () => {
       setLoading(false);
     }
   };
- 
-  
+
   const fetchChartAccount = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await axios.get(
         `${url}/chartaccount/get?page=${currentPage}&limit=${recordsPerPage}&search=${searchTerm}`
@@ -69,10 +68,10 @@ const ChartsofAccounts = () => {
         setTotalPages(response.data.totalPages);
         setCurrentPage(response.data.currentPage);
       } else {
-        setItemList([]);
+        setAccountList([]);
       }
     } catch (error) {
-      console.log("Error fetching chartaccount records:", error);
+      console.log("Error fetching chart account records:", error);
     } finally {
       setLoading(false);
     }
@@ -84,31 +83,33 @@ const ChartsofAccounts = () => {
       let newChartAccount;
 
       if (newAccount.parent_id) {
+        // Creating a sub-account
         newChartAccount = {
           subCat: [
             {
               parent_id: newAccount.parent_id,
               name: newAccount.account_name,
-              amount: parseFloat(newAccount.initial_amount),
-              account_nature: newAccount.account_nature,
+              amount: parseFloat(newAccount.initial_amount), // Only amount is needed
             },
           ],
         };
       } else {
+        // Creating a main account
         newChartAccount = {
           acc_name: newAccount.account_name,
+          account_nature: newAccount.account_nature, // Only relevant for main account
           subCat: [],
         };
       }
 
-       await axios.post(`${url}/chartaccount/add`, newChartAccount);
-      toast.success("Account created Successfully!");
+      await axios.post(`${url}/chartaccount/add`, newChartAccount);
+      toast.success("Account created successfully!");
       setShowAddForm(false);
       resetNewAccount();
       fetchChartAccount();
-      fetchAllAccount()
+      fetchAllAccount();
     } catch (error) {
-      console.log("Error adding chartaccount:", error);
+      console.log("Error adding chart account:", error);
     }
   };
 
@@ -147,65 +148,88 @@ const ChartsofAccounts = () => {
     setEditAccountId(null);
     resetNewAccount();
   };
-  const handleDelete = async (accountId) => {
-    toast.info(
-      <div>
-        Are you sure you want to delete this Account?
-        <div className="flex justify-end mt-2">
-          <button
-            onClick={() => deleteVoucher(accountId)}
-            className="mr-2 px-2 py-1 bg-red-500 text-white rounded"
-          >
-            Yes
-          </button>
-          <button
-            onClick={() => toast.dismiss()}
-            className="px-2 py-1 bg-gray-400 text-white rounded"
-          >
-            No
-          </button>
-        </div>
-      </div>,
-      { autoClose: false }
-    );
-  };
+const handleDelete = async (accountId, subAccountId = null) => {
+  const isSubAccount = Boolean(subAccountId); // Determine if it's a sub-account
 
-  const deleteVoucher = async (accountId) => {
-    setLoading(true);
-    try {
-      const response = await axios.delete(`${url}/chartaccount/delete`, {
-        data: { accountId },
-      });
-      if (response) {
-        toast.dismiss();
-        toast.success("Voucher deleted successfully!");
-        fetchChartAccount();
-      } else {
-        toast.error("Error deleting voucher");
-      }
-    } catch (error) {
-      console.error("Error deleting voucher:", error);
-      toast.error("Error deleting voucher");
-    } finally {
-      setLoading(false);
+  console.log("Handle Delete Called:");
+  console.log("Account ID:", accountId); // Log Account ID
+  console.log("Sub-Account ID:", subAccountId); // Log Sub-Account ID
+
+  toast.info(
+    <div>
+      Are you sure you want to delete this{" "}
+      {isSubAccount ? "Sub-Account" : "Account"}?
+      <div className="flex justify-end mt-2">
+        <button
+          onClick={() => deleteVoucher(accountId, subAccountId)}
+          className="mr-2 px-2 py-1 bg-red-500 text-white rounded"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => toast.dismiss()}
+          className="px-2 py-1 bg-gray-400 text-white rounded"
+        >
+          No
+        </button>
+      </div>
+    </div>,
+    { autoClose: false }
+  );
+};
+
+const deleteVoucher = async (accountId, subAccountId) => {
+  setLoading(true);
+  console.log("Delete Voucher Called:");
+  console.log("Account ID:", accountId);
+  console.log("Sub-Account ID:", subAccountId); // Log Sub-Account ID
+
+  try {
+    const endpoint = `${url}/chartaccount/delete`; // Single endpoint for deleting both accounts and sub-accounts
+
+    // Prepare request body
+    const requestBody = { accountId };
+    if (subAccountId) {
+      requestBody.subAccountId = subAccountId; // Include subAccountId if provided
     }
-  };
- 
+
+    console.log("Request Body:", requestBody); // Log the request body
+
+    const response = await axios.delete(endpoint, { data: requestBody });
+
+    if (response.status === 200) {
+      toast.dismiss();
+      toast.success(
+        `${subAccountId ? "Sub-Account" : "Account"} deleted successfully!`
+      );
+      fetchChartAccount(); // Re-fetch data after deletion
+    } else {
+      toast.error(`Error deleting ${subAccountId ? "Sub-Account" : "Account"}`);
+    }
+  } catch (error) {
+    console.error(
+      `Error deleting ${subAccountId ? "Sub-Account" : "Account"}:`,
+      error
+    );
+    toast.error(`Error deleting ${subAccountId ? "Sub-Account" : "Account"}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   const resetNewAccount = () => {
     setNewAccount({
       parent_id: "",
       account_name: "",
       initial_amount: "",
-      account_nature: "",
+      account_nature: "", // Reset for main account form
     });
   };
 
-  const toggleExpand = (accountId) => {
-    setExpandedAccounts((prevExpanded) => ({
-      ...prevExpanded,
-      [accountId]: !prevExpanded[accountId],
-    }));
+  const toggleExpand = (id) => {
+    setExpandedAccounts((prevId) => (prevId === id ? null : id));
   };
 
   const handleChange = (e) => {
@@ -224,20 +248,42 @@ const ChartsofAccounts = () => {
 
   useEffect(() => {
     fetchChartAccount();
-    fetchAllAccount()
+    fetchAllAccount();
   }, [currentPage, searchTerm]);
 
-// total balnce for summary
+  // total balnce for summary
   const calculateTotalBalance = () => {
-    const total = allAccounts.reduce((acc, account) => {
-      return acc + Number(account.total_balance || 0);
-    }, 0);
-    setTotalBalance(total);
+    // Initialize totals
+    let totalBalance = 0;
+    let totalDebitAmount = 0;
+    let totalCreditAmount = 0;
+
+    // Calculate totals
+    allAccounts.forEach((account) => {
+      const debitAmount = Number(account.total_debit_amount) || 0; // Ensure numeric value
+      const creditAmount = Number(account.total_credit_amount) || 0; // Ensure numeric value
+
+      totalDebitAmount += debitAmount;
+      totalCreditAmount += creditAmount;
+      totalBalance += debitAmount - creditAmount; // Update total balance
+    });
+
+    // Set state values
+    console.log("Total Balance Calculated:", totalBalance);
+    console.log("Total Debit Amount:", totalDebitAmount);
+    console.log("Total Credit Amount:", totalCreditAmount);
+
+    setTotalBalance(totalBalance);
+    setTotalDebit(totalDebitAmount); // Ensure you have a state to store total debit
+    setTotalCredit(totalCreditAmount); // Ensure you have a state to store total credit
   };
+
   useEffect(() => {
-    calculateTotalBalance();
+    if (allAccounts && allAccounts.length > 0) {
+      calculateTotalBalance();
+    }
   }, [allAccounts]);
-  
+
   return (
     <div className="p-4 md:p-6">
       <h1 className="text-2xl mb-5 font-semibold text-left">Accounts List</h1>
@@ -270,6 +316,7 @@ const ChartsofAccounts = () => {
           <div className="bg-white p-5 text-center rounded shadow-lg w-full max-w-md">
             <h1 className="text-lg font-semibold mb-5">Add Account</h1>
             <form className="space-y-6" onSubmit={handleAdd}>
+              {/* Main Account Dropdown */}
               <div className="w-full text-left">
                 <label
                   className="block text-gray-700 font-semibold mb-1"
@@ -293,6 +340,7 @@ const ChartsofAccounts = () => {
                 </select>
               </div>
 
+              {/* Account Name Input */}
               <div className="w-full text-left">
                 <label
                   className="block text-gray-700 font-semibold mb-1"
@@ -312,60 +360,63 @@ const ChartsofAccounts = () => {
                 />
               </div>
 
-              {newAccount.parent_id && (
-                <>
-                  <div className="w-full text-left">
-                    <label
-                      className="block text-gray-700 font-semibold mb-1"
-                      htmlFor="initial_amount"
-                    >
-                      Initial Amount
+              {/* Show Account Nature for Main Account Only */}
+              {!newAccount.parent_id && (
+                <div className="w-full text-left">
+                  <label className="block text-gray-700 font-semibold mb-1">
+                    Nature of Account
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="account_nature"
+                        value="Debit"
+                        onChange={handleChange}
+                        checked={newAccount.account_nature === "Debit"}
+                        className="cursor-pointer"
+                      />
+                      Debit
                     </label>
-                    <input
-                      type="number"
-                      id="initial_amount"
-                      name="initial_amount"
-                      value={newAccount.initial_amount}
-                      onChange={handleChange}
-                      className="border w-full px-2 outline-none py-2 rounded-md"
-                      placeholder="Enter Initial Amount"
-                      required
-                    />
-                  </div>
 
-                  <div className="w-full text-left">
-                    <label className="block text-gray-700 font-semibold mb-1">
-                      Nature of Account
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="account_nature"
+                        value="Credit"
+                        onChange={handleChange}
+                        checked={newAccount.account_nature === "Credit"}
+                        className="cursor-pointer"
+                      />
+                      Credit
                     </label>
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="account_nature"
-                          value="Debit"
-                          onChange={handleChange}
-                          checked={newAccount.account_nature === "Debit"}
-                          className="cursor-pointer"
-                        />
-                        Debit
-                      </label>
-
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="account_nature"
-                          value="Credit"
-                          onChange={handleChange}
-                          checked={newAccount.account_nature === "Credit"}
-                          className="cursor-pointer"
-                        />
-                        Credit
-                      </label>
-                    </div>
                   </div>
-                </>
+                </div>
               )}
 
+              {/* Initial Amount for Sub-Accounts */}
+              {newAccount.parent_id && (
+                <div className="w-full text-left">
+                  <label
+                    className="block text-gray-700 font-semibold mb-1"
+                    htmlFor="initial_amount"
+                  >
+                    Initial Amount
+                  </label>
+                  <input
+                    type="number"
+                    id="initial_amount"
+                    name="initial_amount"
+                    value={newAccount.initial_amount}
+                    onChange={handleChange}
+                    className="border w-full px-2 outline-none py-2 rounded-md"
+                    placeholder="Enter Initial Amount"
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Form Buttons */}
               <div className="text-right space-x-6">
                 <button
                   type="button"
@@ -385,6 +436,7 @@ const ChartsofAccounts = () => {
           </div>
         </div>
       )}
+
       {loading ? (
         <div className="flex justify-center items-center h-40">
           <RotatingLines width="50" strokeColor="#067528" />
@@ -411,6 +463,7 @@ const ChartsofAccounts = () => {
                 key={account._id}
                 className="border border-gray-300 rounded-md mb-4"
               >
+                {/* Account Header */}
                 <div
                   className="grid grid-cols-4 text-center cursor-pointer"
                   onClick={() => toggleExpand(account._id)}
@@ -419,7 +472,7 @@ const ChartsofAccounts = () => {
                   <div className="py-2">{account.total_debit_amount}</div>
                   <div className="py-2">{account.total_credit_amount}</div>
                   <div className="py-2 flex justify-between items-center">
-                    <div className="flex gap-5 pl-32">
+                    <div className="flex gap-3">
                       <button
                         onClick={() => {
                           setEditAccountId(account._id);
@@ -440,7 +493,7 @@ const ChartsofAccounts = () => {
                       onClick={() => toggleExpand(account._id)}
                       className="text-gray-600 hover:text-gray-800 mr-2"
                     >
-                      {expandedAccounts[account._id] ? (
+                      {expandedAccounts === account._id ? (
                         <FaChevronUp />
                       ) : (
                         <FaChevronDown />
@@ -452,7 +505,9 @@ const ChartsofAccounts = () => {
                 {/* Expandable Section */}
                 <div
                   className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                    expandedAccounts[account._id] ? "max-h-screen" : "max-h-0"
+                    expandedAccounts === account._id
+                      ? "max-h-screen"
+                      : "max-h-0"
                   }`}
                 >
                   <div className="mt-2 border border-gray-300 rounded-md shadow-md">
@@ -466,18 +521,6 @@ const ChartsofAccounts = () => {
                             <h3 className="text-lg font-bold text-gray-800">
                               {subAccount.name}
                             </h3>
-                            <p className="text-sm text-gray-500">
-                              Nature:{" "}
-                              <span
-                                className={`font-semibold ${
-                                  subAccount.account_nature === "credit"
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }`}
-                              >
-                                {subAccount.account_nature}
-                              </span>
-                            </p>
                           </div>
 
                           <div className="flex gap-3">
@@ -494,7 +537,9 @@ const ChartsofAccounts = () => {
                               <FaEdit />
                             </button>
                             <button
-                              onClick={() => handleDelete(subAccount._id)}
+                              onClick={() =>
+                                handleDelete(account, subAccount._id)
+                              }
                               className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
                             >
                               <FaTrash />
@@ -531,13 +576,7 @@ const ChartsofAccounts = () => {
                       <form
                         onSubmit={(e) => {
                           e.preventDefault();
-                          handleEdit(
-                            editAccountId,
-                            true,
-                            account.subCat.find(
-                              (sub) => sub._id === editAccountId
-                            )
-                          );
+                          handleEdit(editAccountId);
                         }}
                       >
                         <input
@@ -586,7 +625,20 @@ const ChartsofAccounts = () => {
             Account Summary
           </h2>
           <div className="space-y-2 text-sm text-gray-600">
-            <div className="flex justify-between  pt-2 mt-2">
+            <div className="flex justify-between pt-2 mt-2">
+              <span className="font-medium">Total Debit:</span>
+              <span className={`font-semibold`}>PKR {totalDebit}</span>
+            </div>
+            <div className="flex justify-between pt-2 mt-2">
+              <span className="font-medium">Total Credit:</span>
+              <span
+                className={`font-semibold
+                  `}
+              >
+                PKR {totalCredit}
+              </span>
+            </div>
+            <div className="flex justify-between pt-2 mt-2">
               <span className="font-medium">Balance:</span>
               <span
                 className={`font-semibold ${

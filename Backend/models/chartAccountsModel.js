@@ -13,12 +13,12 @@ const subAccountSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
-    default: 0, // Opening amount
-    min: 0, // Prevent negative opening amount
+    default: 0, 
+    min: 0, 
   },
   balance: {
     type: Number,
-    default: 0, // Ensure default balance is 0
+    default: 0, 
   },
 });
 
@@ -29,9 +29,9 @@ const ChartAccountSchema = new mongoose.Schema({
     required: true,
   },
   account_nature: {
-    // Account nature for the head of account
+
     type: String,
-    enum: ["Asset", "Liability", "Income", "Expense"], // Example account types
+    enum: ["Debit", "Credit"], 
     required: true,
   },
   total_credit_amount: {
@@ -57,14 +57,10 @@ ChartAccountSchema.pre("save", function (next) {
     this.subCat.forEach((subAccount) => {
       const effectiveBalance = subAccount.balance;
 
-      // Accumulate totals based on account nature
-      if (
-        this.account_nature === "Income" ||
-        this.account_nature === "Liability"
-      ) {
-        totalCredit += effectiveBalance; // For Income and Liabilities, we credit
-      } else {
-        totalDebit += effectiveBalance; // For Expenses and Assets, we debit
+      if (this.account_nature === "Credit") {
+        totalCredit += effectiveBalance; // Credit accounts increase totalCredit
+      } else if (this.account_nature === "Debit") {
+        totalDebit += effectiveBalance; // Debit accounts increase totalDebit
       }
     });
   }
@@ -73,6 +69,7 @@ ChartAccountSchema.pre("save", function (next) {
   this.total_debit_amount = totalDebit;
   next();
 });
+
 
 const ChartAccount = mongoose.model("Chart_account", ChartAccountSchema);
 export default ChartAccount;

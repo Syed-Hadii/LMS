@@ -52,13 +52,17 @@ const Navbar = () => {
     >
       <div className="container flex justify-between items-center">
         <div className="search hidden md:flex border border-[#cfd1d0] focus-within:outline focus-within:outline-[#a8aaa8] focus-within:outline-1 rounded-[4px] py ml-14">
-          <button className="border-r-white bg-white rounded-l-md pl-2 pr-1.5 py-1 ">
+          <button
+            className="border-r-white bg-white rounded-l-md pl-2 pr-1.5 py-1 "
+            disabled
+          >
             <FiSearch className="w-[17px] h-[17px] text-[#808180]" />
           </button>
           <input
             type="text"
             placeholder="Search for ..."
-            className="border-l-white text-[14px] outline-none rounded-r-md w-[275px] px-1 py-[7px]"
+            className="border-l-white bg-white text-[14px] outline-none rounded-r-md w-[275px] px-1 py-[7px]"
+            disabled
           />
         </div>
 
